@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-24",
+  "source_repo_commit": "38e35f4089f720560724537be764685294098e73",
+  "gist_revision": "aa97173f59786b759c73cd71ced261c3fe97e011",
+  "current_version": "5.4.24",
+  "confirmed_contracts": 32,
+  "unresolved": [
+    "SSO/MFA and forced CSRF login branches",
+    "durable server delta cursor not established",
+    "subscription, size and non-PDF upload limits",
+    "shared and read-only role permission matrix",
+    "concurrent conditional writes"
+  ]
+}

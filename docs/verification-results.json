@@ -1,0 +1,352 @@
+{
+  "date": "2026-10-25",
+  "exported_at": "2026-10-24T16:19:03.926376+00:00",
+  "frontend_version": "5.4.24",
+  "verified_count": 38,
+  "catalog_count": 38,
+  "operations": {
+    "list_collections": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "98f64569fa66d873bd22a388a18de518bb0ddbc36934f5588cbda54259ac1ea8",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:20.747810+00:00",
+      "detail": "Authenticated JSON collection IDs",
+      "http_status": 200
+    },
+    "list_lists": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "f909654f64a5229c5594eef740e5f5025a3b3b9b4b4f287d01de2a531a0a5592",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:24.579173+00:00",
+      "detail": "List array with resource IDs",
+      "http_status": 200
+    },
+    "list_items": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "5d8aca0b0e302a5ea7d4e9670872833fde5e289ae4507a18ad06c15f64cff0d0",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:23.318613+00:00",
+      "detail": "Complete scroll traversal with valid item objects",
+      "http_status": 200
+    },
+    "list_list_items": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "431a70de01391736521436320e3763e0897abf4a4fa1c4481108f05ce0aae718",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:38.422061+00:00",
+      "detail": "List item response parsed and membership present",
+      "http_status": 200
+    },
+    "get_item": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "b1b79b5f91b88d5f96cf728e0f47bd064469a0c95843af81e22372d4aa85ef2f",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:25.766612+00:00",
+      "detail": "GET returned the requested item ID",
+      "http_status": 200
+    },
+    "create_collection": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "7354aa4feb48732518859a8907894b82ecbcbf1fd94587f8db88846fb2183111",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:31:58.298755+00:00",
+      "detail": "Created private named test library, found by authenticated readback",
+      "http_status": 200
+    },
+    "create_item": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "79398bca3f89963c685e273acbfa691bb92e14a761c1f81fea9ce23799f9506d",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:27.421126+00:00",
+      "detail": "Synthetic metadata record created and title read back",
+      "http_status": 200
+    },
+    "import_identifier": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "c0ef4ae64201735b72bcd8e72097443bc323b2935a8494f5ebdc36527f93054e",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:35:42.010128+00:00",
+      "detail": "doi import/merge resolves to independently read test reference",
+      "http_status": 200
+    },
+    "update_metadata": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "889b7cd7eb6c66553ce8255af057ce4b947009e1f5d60b05afb5cdbe181e2b8b",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:32.336717+00:00",
+      "detail": "PATCH metadata persisted in independent GET",
+      "http_status": 200
+    },
+    "update_notes": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "9dc15d9560df46a902403ed14b14de31b17714cc47596735b29477004ff0830a",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:28.235179+00:00",
+      "detail": "Notes independently read back",
+      "http_status": 200
+    },
+    "set_tags": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "a1283501a974cc3672ddfd49e9af9e75ad8b192834933871e3f2f650ab1955b5",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:29.836327+00:00",
+      "detail": "Tag set independently read back",
+      "http_status": 200
+    },
+    "add_tags": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "a15b14f6bf48f1d89d5b21457f371816ed7c2d81d519cb4ef9b6d14ae083dc4c",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:30.668974+00:00",
+      "detail": "Tag set independently read back",
+      "http_status": 200
+    },
+    "remove_tags": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "f2d37bf935ceb59927a54d3b815223bb589aa630f7bfc07fec725a90ba37577e",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:31.487060+00:00",
+      "detail": "Tag set independently read back",
+      "http_status": 200
+    },
+    "delete_item": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "240f178a4cc37832522b07c9503c9e268181af250a10152ed46b31fee11e98a4",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:36:31.746430+00:00",
+      "detail": "Human-confirmed disposable test object deletion followed by independent tombstone/absence readback",
+      "http_status": 200
+    },
+    "get_annotations": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "9e551906ea0a54ce0659737218565a642c12fe2db67ca7b0ecd8201aa1bf271a",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:39.634812+00:00",
+      "detail": "Annotation array read; empty does not validate highlight fields",
+      "http_status": 200
+    },
+    "update_annotation": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "70545d88cb1066c4c5f9d7341889d40ea0c1f0ce45692733d9bcf9872d3344d9",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:08:53.338379+00:00",
+      "detail": "Synthetic PDF note text and color PATCH independently confirmed by annotations GET",
+      "http_status": 200
+    },
+    "delete_annotation": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "8d71b8e6cce64ddb20615cc3ae24eea5aea8049cf6aa9b08101d9bbfdead8d6b",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:12:19.178499+00:00",
+      "detail": "Separately approved synthetic note DELETE confirmed absent in annotation GET; highlight retained",
+      "http_status": 200
+    },
+    "create_list": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "3e4fb065a60b7853dd88ae4fb7853209126fac4ba667a87cf4d9124975e996b6",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:33.148293+00:00",
+      "detail": "New List present in collection list GET",
+      "http_status": 200
+    },
+    "rename_list": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "4402f69f72429d49e04d0a47667891a03b908e02d725d44f1175fafb06f1978c",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:33.944745+00:00",
+      "detail": "Renamed List independently read back",
+      "http_status": 200
+    },
+    "delete_list": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "235736bba68ab5229444d6ee8c97b8ef2394138c5f29158a2ebaf1369d958831",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:36:32.624439+00:00",
+      "detail": "Human-confirmed disposable test object deletion followed by independent tombstone/absence readback",
+      "http_status": 200
+    },
+    "add_to_list": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "21dd54f246e7f0634c41e88f76b931057c217185f0a0794e2e809ed91455fabe",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:38.419094+00:00",
+      "detail": "Membership verified by list item GET after bounded propagation wait",
+      "http_status": 200
+    },
+    "remove_from_list": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "e22220de5bdfd5be1879e346775fb27b9a461681963a77a6acc80d9f4f41a33e",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:33:39.238576+00:00",
+      "detail": "Membership removal verified by list item GET",
+      "http_status": 200
+    },
+    "add_file": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "8e5ded4f65f40654cf9f893c3f4d061886f8612c760f26f0507fd5345b8fd7c0",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:35:21.355287+00:00",
+      "detail": "Complete synthetic PDF storage PUT, processing poll, and independent SHA-256 association readback",
+      "http_status": 200
+    },
+    "upload_file": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "d95b228ee2f40ca92d17a9be127f4315f681822aed71352ef3c1945cf0fc5f79",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:05:25.338411+00:00",
+      "detail": "Direct upload_file flow created/resolved item, independent GET confirms SHA-256",
+      "http_status": 200
+    },
+    "uploads_pending": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "354688198ea9c2cfc1fae315a2de8eb80f56643fb3ca99c7a6c3469ec8e8932d",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:35:21.356747+00:00",
+      "detail": "Complete synthetic PDF storage PUT, processing poll, and independent SHA-256 association readback",
+      "http_status": 200
+    },
+    "get_revisions": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "b697be4599263d3cfabed7d8e2842c17a06b1c07f7dc1e866d230e390cc7cb94",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:02:57.953805+00:00",
+      "detail": "Own test item returned revisions array with 0 entries; not a delta cursor",
+      "http_status": 200
+    },
+    "list_smartlists": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "31e4ad7435047df28af13f117701caa437e1541370d730b4a4d66e9c69da2647",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:02:58.372695+00:00",
+      "detail": "Smart List array returned for authorized test library",
+      "http_status": 200
+    },
+    "get_smartlist": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "f82c77773d3cb1af83758ebed4b5ebaab85b945a08982e4bccbc9db589a69372",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:07:36.705494+00:00",
+      "detail": "Requested Smart List ID returned",
+      "http_status": 200
+    },
+    "create_smartlist": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "61990c2238bf1c426d0de8a82041b7c4f6f29b595556fdfac501fa7bec2e45b8",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:07:36.286419+00:00",
+      "detail": "Created Smart List read back with exact query",
+      "http_status": 200
+    },
+    "update_smartlist": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "e80a1dc1551d4d1b132d3927d7f45928d5f34bbf7ab25ae63b288bc71fb61f17",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:07:37.549904+00:00",
+      "detail": "Updated name and saved query read back exactly",
+      "http_status": 200
+    },
+    "delete_smartlist": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "e3863bba325618bc71c04121c9ce133b95790fee32eb1aaf33b8a712fb2aba42",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:14:40.917938+00:00",
+      "http_status": null,
+      "detail": "Approved DELETE completed client success guard; independent GET=404 and list absence confirmed. Exact DELETE status was not retained.",
+      "readback_http_status": 404
+    },
+    "set_primary_file": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "3e514c9bdb7dbb82a42de8fe16fa62c0879a8fbe96c9a94758ac303079d01cc6",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:05:27.016051+00:00",
+      "detail": "Second synthetic PDF made primary, independent item GET confirms hash",
+      "http_status": 200
+    },
+    "create_annotation": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "9af9ce0281f330b2e9396c1465c422d4e525f3e69fc235fdab7cb83c721fd08c",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:08:52.454134+00:00",
+      "detail": "Synthetic PDF note and single-page highlight created via bulk_single; all outgoing fields match annotation GET",
+      "http_status": 200
+    },
+    "import_pmid": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "1dc88a092b155fca6e5b8809a62075ab3bf1925e8b7df3ec024cc7985a84fe82",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:35:42.866195+00:00",
+      "detail": "pmid import/merge resolves to independently read test reference",
+      "http_status": 200
+    },
+    "upload_pdf_flow": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "b003143e276c060eb4dbd0f841266e1adb377d85f078fc3279e7df627041e3d5",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T15:35:21.357145+00:00",
+      "detail": "Complete synthetic PDF storage PUT, processing poll, and independent SHA-256 association readback",
+      "http_status": 200
+    },
+    "import_pdf_flow": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "d8c1d4f1a51d76f52fdcd46b8075276ca618edd5e76d5ffdbe41f0e44300d2fc",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:05:25.339036+00:00",
+      "detail": "Fresh synthetic PDF PUT, pending completion and upload_file reassociation confirmed by GET hash",
+      "http_status": 200
+    },
+    "reader_metadata": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "c21bd7c3c23c27645f44412e9ae6bcd320eb39a85c42262673356161857a045f",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:02:56.491056+00:00",
+      "detail": "DOI metadata matches requested canonical DOI",
+      "http_status": 200
+    },
+    "watch_changes": {
+      "evidence": "SOURCE_CONFIRMED",
+      "verification": "VERIFIED",
+      "contract_sha256": "4f00091f0eca221eef09dda7f3fd72554b8428ca0aea8dc117415163642430b1",
+      "semantic_check": true,
+      "checked_at": "2026-10-24T16:12:15.362192+00:00",
+      "detail": "Real Bayeux subscription received controlled item updated event; fresh connection full scan recovered a note change made while disconnected",
+      "http_status": 200
+    }
+  }
+}

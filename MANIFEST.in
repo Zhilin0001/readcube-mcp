@@ -1,0 +1,10 @@
+include README.md pyproject.toml .env.example readcube.example.toml requirements-lock.txt
+include research/public-assets.json research/phase-1-2.json research/progress.json
+include research/annotation-findings.md research/auth-findings.md research/realtime-findings.md
+recursive-include docs *.md *.json
+recursive-include scripts *.py
+recursive-include tests *.py
+include examples/mcp-config.json examples/search_and_plan.py
+global-exclude *.py[cod]
+global-exclude __pycache__
+recursive-include mcp *.md *.py *.sh

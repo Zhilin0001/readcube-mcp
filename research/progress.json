@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-25",
+  "stages": {
+    "public_source_analysis": {
+      "status": "COMPLETE",
+      "entry_and_chunk_assets": 47
+    },
+    "endpoint_catalog": {
+      "status": "COMPLETE",
+      "capabilities": 38,
+      "verified": 38
+    },
+    "live_verification": {
+      "status": "EXTENDED_CONTRACTS_VERIFIED",
+      "unverified": [],
+      "boundary": "Only documented cases, not every role, parameter or auth branch"
+    },
+    "sdk": {
+      "status": "IMPLEMENTED",
+      "formal_operations": "session-scoped evidence gate",
+      "version": "0.2.0"
+    },
+    "tests": {
+      "local_passed": 149,
+      "live_read_only_passed": 2,
+      "forced_pagination": "PASSED",
+      "lint": "PASSED"
+    },
+    "mcp": {
+      "status": "STDIO_SMOKE_PASSED",
+      "tools": 27,
+      "structured_output": true
+    }
+  },
+  "limitations": [
+    "SSO/MFA, forced CSRF and revised password login not live tested",
+    "No durable server delta cursor; notifications trigger complete scans",
+    "Shared/read-only role matrix and concurrent conditional writes unverified",
+    "Non-PDF upload, size/subscription limits and rotated/cross-page geometry unverified"
+  ],
+  "authorization": {
+    "test_collection_name": "Codex API Test 2026-10-24",
+    "single_object_deletion": "separately confirmed by user"
+  }
+}

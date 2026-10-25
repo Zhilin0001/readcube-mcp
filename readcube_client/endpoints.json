@@ -1,0 +1,605 @@
+{
+  "list_collections": {
+    "method": "GET",
+    "host": "services",
+    "path": "/collections",
+    "body_contract": null,
+    "response_key": "collections",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2435028,
+      "needle": "query(e){return this.http.get(`${w1.baseUrls.services}/collections`)"
+    }
+  },
+  "list_lists": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists",
+    "body_contract": null,
+    "response_key": "lists",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2453536,
+      "needle": "query(e){let r=`${w1.baseUrls.sync}/collections/${e.collection_id}/lists`"
+    }
+  },
+  "list_items": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items",
+    "body_contract": null,
+    "response_key": "items",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2452194,
+      "needle": "itemsEndpointUrl(e){"
+    }
+  },
+  "list_list_items": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists/{list_id}/items",
+    "body_contract": null,
+    "response_key": "items",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2452194,
+      "needle": "itemsEndpointUrl(e){"
+    }
+  },
+  "get_item": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}",
+    "body_contract": null,
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2441745,
+      "needle": "get(e,r){let n=`${w1.baseUrls.sync}/collections/${e}/items/${r}`"
+    }
+  },
+  "create_collection": {
+    "method": "POST",
+    "host": "services",
+    "path": "/collections",
+    "body_contract": "{name: string}",
+    "response_key": "collection",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2435849,
+      "needle": "post(e){let r=`${w1.baseUrls.services}/collections`"
+    }
+  },
+  "create_item": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items",
+    "body_contract": "{item: metadata}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2442205,
+      "needle": "post(e,r){let n=`${w1.baseUrls.sync}/collections/${e}/items`"
+    }
+  },
+  "import_identifier": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items",
+    "body_contract": "{ext_ids:{doi:string},merge:true,resolve:true,resolve_files:false}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2445896,
+      "needle": "add(e,r,n,a,s){"
+    }
+  },
+  "update_metadata": {
+    "method": "PATCH",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}",
+    "body_contract": "{item: metadata}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2442479,
+      "needle": "patch(e,r,n){let a=`${w1.baseUrls.sync}/collections/${e}/items/${r}`"
+    }
+  },
+  "update_notes": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/set_notes",
+    "body_contract": "{notes:string}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2442647,
+      "needle": "updateNotes(e,r,n){"
+    }
+  },
+  "set_tags": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/set_tags",
+    "body_contract": "{tags:string[]}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2443719,
+      "needle": "setTags(e,r,n){"
+    }
+  },
+  "add_tags": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/add_tags",
+    "body_contract": "{tags:string[]}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2443401,
+      "needle": "addTags(e,r,n){"
+    }
+  },
+  "remove_tags": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/remove_tags",
+    "body_contract": "{tags:string[]}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2443557,
+      "needle": "removeTags(e,r,n){"
+    }
+  },
+  "delete_item": {
+    "method": "DELETE",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}",
+    "body_contract": null,
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2442342,
+      "needle": "delete(e,r){let n=`${w1.baseUrls.sync}/collections/${e}/items/${r}`"
+    }
+  },
+  "get_annotations": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/annotations",
+    "body_contract": null,
+    "response_key": "annotations",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2442809,
+      "needle": "annotations(e,r){"
+    }
+  },
+  "update_annotation": {
+    "method": "PATCH",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/annotations/{annotation_id}",
+    "body_contract": "raw patch object",
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2443105,
+      "needle": "patchAnnotation(e,r,n,a){"
+    }
+  },
+  "delete_annotation": {
+    "method": "DELETE",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/annotations/{annotation_id}",
+    "body_contract": null,
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2442949,
+      "needle": "deleteAnnotation(e,r,n){"
+    }
+  },
+  "create_list": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists",
+    "body_contract": "{list:{id,collection_id,name,parent_id}}",
+    "response_key": "list",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2453944,
+      "needle": "post(e){let r=`${w1.baseUrls.sync}/collections/${e.collection_id}/lists`"
+    }
+  },
+  "rename_list": {
+    "method": "PATCH",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists/{list_id}",
+    "body_contract": "{list:{id,collection_id,name}}",
+    "response_key": "list",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2454093,
+      "needle": "patch(e){let r=`${w1.baseUrls.sync}/collections/${e.collection_id}/lists/${e.id}`"
+    }
+  },
+  "delete_list": {
+    "method": "DELETE",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists/{list_id}",
+    "body_contract": null,
+    "response_key": "list",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2454291,
+      "needle": "delete(e,r){let n=`${w1.baseUrls.sync}/collections/${e}/lists/${r}`"
+    }
+  },
+  "add_to_list": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists/{list_id}/add_items",
+    "body_contract": "{item_ids:string[]}",
+    "response_key": "list",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2454428,
+      "needle": "addItems(e,r,n){"
+    }
+  },
+  "remove_from_list": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists/{list_id}/remove_items",
+    "body_contract": "{item_ids:string[]}",
+    "response_key": "list",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2454590,
+      "needle": "removeItems(e,r,n){"
+    }
+  },
+  "add_file": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/add_file",
+    "body_contract": "{file_name,file_size,hash,primary:false,resolve:false,skip_resolve:true,merge:false}",
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2444492,
+      "needle": "addFile(e,r,n){"
+    }
+  },
+  "upload_file": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/upload_file",
+    "body_contract": "{file_name,file_size,hash,list_id?,resolve:true,skip_resolve:false,merge:true}",
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2444382,
+      "needle": "uploadFile(e,r){let n=`${w1.baseUrls.sync}"
+    }
+  },
+  "uploads_pending": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/uploads_pending",
+    "body_contract": null,
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2445179,
+      "needle": "uploadsPending(e){"
+    }
+  },
+  "get_revisions": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/revisions",
+    "body_contract": null,
+    "response_key": "revisions",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2451558,
+      "needle": "getRevisions(e,r){return this.http.get("
+    }
+  },
+  "list_smartlists": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/smartlists",
+    "body_contract": null,
+    "response_key": "smartlists",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2455967,
+      "needle": "query(e){let r=`${w1.baseUrls.sync}/collections/${e.collection_id}/smartlists`"
+    }
+  },
+  "get_smartlist": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/smartlists/{smartlist_id}",
+    "body_contract": null,
+    "response_key": "smartlist",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2456104,
+      "needle": "get(e,r){let n=`${w1.baseUrls.sync}/collections/${e}/smartlists/${r}`"
+    }
+  },
+  "create_smartlist": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/smartlists",
+    "body_contract": "{smartlist:{id,collection_id,name,query,sort?,search_mode?}}",
+    "response_key": "smartlist",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2456244,
+      "needle": "post(e){let r=`${w1.baseUrls.sync}/collections/${e.collection_id}/smartlists`"
+    }
+  },
+  "update_smartlist": {
+    "method": "PATCH",
+    "host": "sync",
+    "path": "/collections/{collection_id}/smartlists/{smartlist_id}",
+    "body_contract": "{smartlist:{id,collection_id,name?,query?,sort?,search_mode?}}",
+    "response_key": "smartlist",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2456434,
+      "needle": "patch(e){let r=`${w1.baseUrls.sync}/collections/${e.collection_id}/smartlists/${e.id}`"
+    }
+  },
+  "delete_smartlist": {
+    "method": "DELETE",
+    "host": "sync",
+    "path": "/collections/{collection_id}/smartlists/{smartlist_id}",
+    "body_contract": null,
+    "response_key": "smartlist",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2456673,
+      "needle": "delete(e,r){let n=`${w1.baseUrls.sync}/collections/${e}/smartlists/${r}`"
+    }
+  },
+  "set_primary_file": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/set_primary",
+    "body_contract": "{hash:sha256}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2444868,
+      "needle": "setPrimary(e,r,n){let a=`${w1.baseUrls.sync}"
+    }
+  },
+  "create_annotation": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/bulk_single",
+    "body_contract": "{type:item,action_name:add_annotation,data:[{id:item_id,data:note_or_single_page_highlight}]}",
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-25",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2450223
+    }
+  },
+  "import_pmid": {
+    "method": "POST",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items",
+    "body_contract": "{ext_ids:{pmid:string},merge:true,resolve:true,resolve_files:false}",
+    "response_key": "item",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2445896,
+      "needle": "add(e,r,n,a,s){"
+    }
+  },
+  "upload_pdf_flow": {
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "method": "FLOW",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/{item_id}/add_file",
+    "body_contract": "SHA256 -> add_file -> PUT upload_url -> uploads_pending -> add_file -> GET hash",
+    "source": {
+      "url": "https://app.readcube.com/chunk-JCLW3CJS.js",
+      "character_offset": 858000
+    },
+    "response_key": null,
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24"
+  },
+  "import_pdf_flow": {
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "method": "FLOW",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/upload_file",
+    "body_contract": "SHA256 -> upload_file -> PUT upload_url -> uploads_pending -> upload_file -> GET hash",
+    "source": {
+      "url": "https://app.readcube.com/chunk-JCLW3CJS.js",
+      "character_offset": 858000
+    },
+    "response_key": null,
+    "discovered": "2026-10-24",
+    "frontend_version": "5.4.24"
+  },
+  "reader_metadata": {
+    "method": "GET",
+    "host": "services",
+    "path": "/reader/metadata",
+    "body_contract": "query doi=canonical DOI",
+    "response_key": "meta",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-25",
+    "frontend_version": "historical; live checked separately",
+    "source": {
+      "url": "https://blog.hxgpark.com/posts/ReadCubePapersAPI/",
+      "needle": "/reader/metadata"
+    }
+  },
+  "watch_changes": {
+    "method": "FLOW",
+    "host": "push",
+    "path": "/bayeux",
+    "body_contract": "GET JSONP handshake -> WSS connect/subscribe -> /production/collections/{collection_id}/changes; full scan recovery",
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-25",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2340179
+    }
+  }
+}

@@ -1,0 +1,9 @@
+[readcube]
+timeout = 30
+retries = 2
+min_interval = 0.25
+dry_run = true
+write_collections = []
+upload_hosts = ["sync.readcube.com", "s3.amazonaws.com"]
+upload_roots = []
+# Session and ledger use ~/.config/readcube-client/ by default.

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "readcube": {
+      "command": "/absolute/path/to/project/.venv/bin/python",
+      "args": ["-m", "readcube_mcp", "--config", "/absolute/path/to/project/readcube.local.toml"],
+      "cwd": "/absolute/path/to/project"
+    }
+  }
+}

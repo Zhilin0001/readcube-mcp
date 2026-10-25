@@ -1,7 +1,10 @@
 """Private, single-owner HTTP deployment with external OAuth JWT verification."""
 import asyncio
 import os
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
+from pathlib import Path
+import shutil
+import tempfile
 from urllib.parse import urlsplit
 
 import jwt
@@ -110,8 +113,28 @@ def create_app(env=None, verifier=None):
     return Starlette(routes=routes, lifespan=lifespan)
 
 
+@contextmanager
+def render_session(env, source='/etc/secrets/session.json'):
+    """Stage the explicitly configured platform secret as a private regular file."""
+    if env.get('READCUBE_SESSION_FILE') != source:
+        yield
+        return
+    with tempfile.TemporaryDirectory(prefix='readcube-session-') as directory:
+        target = Path(directory) / 'session.json'
+        # The source is Render's trusted secret mount, which uses symlinks.
+        with open(source, 'rb') as incoming, target.open('xb') as outgoing:
+            os.chmod(target, 0o600)
+            shutil.copyfileobj(incoming, outgoing)
+        env['READCUBE_SESSION_FILE'] = str(target)
+        try:
+            yield
+        finally:
+            env['READCUBE_SESSION_FILE'] = source
+
+
 def main():
-    uvicorn.run(create_app(), host='0.0.0.0', port=int(os.environ.get('PORT', '10000')), access_log=False)
+    with render_session(os.environ):
+        uvicorn.run(create_app(), host='0.0.0.0', port=int(os.environ.get('PORT', '10000')), access_log=False)
 
 
 if __name__ == '__main__':

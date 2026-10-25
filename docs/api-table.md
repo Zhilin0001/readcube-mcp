@@ -1,4 +1,4 @@
-| 操作 | 方法 | Host | 路径 | 本轮状态 |
+| Operation | Method | Host | Path | Recorded status |
 |---|---|---|---|---|
 | `list_collections` | GET | `services` | `/collections` | VERIFIED / SOURCE_CONFIRMED |
 | `list_lists` | GET | `sync` | `/collections/{collection_id}/lists` | VERIFIED / SOURCE_CONFIRMED |

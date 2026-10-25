@@ -1,41 +1,66 @@
 # ReadCube MCP 0.2.0
 
-Python 3.11+，本地 stdio MCP，27 个工具；包含当前 SDK 的全部依赖入口。安装包本身不含密码、Cookie、会话绑定验证记录或私人文献内容。
+A Python 3.11+ local stdio MCP server with **27 tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
-## 当前这台 Mac
+## Install from the repository
 
-主代理生成的 `mcp.local.json` 可直接导入支持本地 stdio 的 MCP 客户端。它调用 `start.local.sh`，自动进入当前项目并复用现有 Python 环境、会话和验证记录。无需重新登录。
+From the repository root:
 
-当前已授权写入范围仍只有 `Codex API Test 2026-10-24` 测试库。写入默认 dry-run；删除需要单独确认。当前范围由项目中的 `readcube.local.toml` 决定，生成 MCP 不会扩大权限。源代码项目移动后需要重新生成本机配置。
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e '.[mcp,realtime]'
+cp readcube.example.toml readcube.local.toml
+.venv/bin/python -m readcube_mcp --config readcube.local.toml
+```
 
-## 无凭据分发包
+Authenticate and verify the required operations before using production tools; see the [main README](https://github.com/Zhilin0001/readcube-mcp#authentication-and-verification). The initial configuration has no authorized write Collections. The source checkout and the portable bundle use different launch layouts; `install.sh` below is intended for an extracted bundle containing its wheel.
 
-解压 `readcube-mcp-0.2.0.zip`，在解压目录执行：
+## Build and install a portable bundle
+
+From the repository root, with the `dev` dependencies installed:
+
+```bash
+.venv/bin/python -m build
+.venv/bin/python scripts/build_mcp_bundle.py
+```
+
+Extract `dist/readcube-mcp-0.2.0.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh
 ```
 
-这会建立该目录自己的 `.venv`，安装随包 wheel 和 MCP/实时监听依赖（需联网获取依赖），然后生成本机 `mcp.local.json`。已有 `readcube.local.toml` 会保留；首次配置的写入白名单为空。安装不登录、不修改远端文献。
+The installer creates a private `.venv`, installs the bundled wheel with MCP and realtime dependencies, and generates `mcp.local.json`. Internet access is required to download dependencies. Existing `readcube.local.toml` is preserved; a newly generated file has an empty write allowlist. Installation does not log in or modify the remote library.
 
-对于支持 `mcpServers` JSON 的客户端，将生成的 `mcpServers.readcube` 配置并入现有配置，不要覆盖其他 MCP 服务。stdio 由客户端按需启动，手动运行 start.sh 后等待输入是正常现象；协议 stdout 不应添加提示文本。
+For a client that accepts `mcpServers` JSON, merge the generated `mcpServers.readcube` entry into its existing configuration. The entry invokes `start.sh`, which resolves the bundle directory itself. The client starts the stdio process on demand; a manually started process waiting for input is normal. Keep protocol stdout free of extra output.
 
-## 认证及验证边界
+The build also creates a separate `start.local.sh` and `mcp.local.json` for the original source workspace. These reuse that workspace's Python environment, configuration, session, and verification ledger. They are excluded from the ZIP. Moving the workspace requires regenerating this machine-specific configuration.
 
-默认会话：`~/.config/readcube-client/session.json`；默认验证记录：`~/.config/readcube-client/verified.json`。两者仅在本机保留，不能放入分发包。
+## Authentication and verification
 
-新机器或新会话不会继承当前账户的 VERIFIED 状态。可以用 `.venv/bin/python scripts/login_local.py` 在本地正常交互登录，再按 SDK 研究文档进行明确授权的验证；`scripts/verify_api.py` 默认只读验证 Collection 列表并生成后续计划。完整验证需要专用测试库和逐项语义检查，不能通过复制公开报告解锁接口。SSO/MFA 等特殊登录分支仍未完整实现。
+Default local files:
 
-当前 MCP 暴露的工具及 JSON Schema 见 `tools.json`。支持 Collection/List/Smart List、检索、DOI/PMID 导入、PDF 上传、新建 PDF 文献、笔记/标签、批注、高亮、metadata/revisions，以及通知辅助完整扫描。监听窗口最多 30 秒；完整扫描另需时间，客户端请求超时应留出余量。不提供持久增量游标。
+- Session: `~/.config/readcube-client/session.json`, permissions `0600`.
+- Verification ledger: `~/.config/readcube-client/verified.json`.
 
-## 检查连接
+Do not distribute either file. A new installation or changed session is not unlocked by this repository's public verification snapshot. Use the local interactive login helper and perform authorized semantic verification for the relevant operations. `scripts/verify_api.py` defaults to a Collection-list read and a saved dry-run plan; broader live verification needs a dedicated test library. Extended research scripts depend on private test-resource files and are not a general one-command initialization flow. Special SSO/MFA/CSRF flows remain incompletely tested.
 
-已有合法会话和 `list_collections` 验证记录时：
+## Tool access
+
+The generated `tools.json` contains all 27 tool definitions and JSON schemas. Tools cover library reading and search, identifiers, PDFs, notes/tags, Lists/Smart Lists, annotations, metadata/revisions, and notification-assisted full scans. The SDK's 38 cataloged operations are not 38 separate MCP tools.
+
+Writes default to dry-run. Execution requires human authorization and a matching `write_collections` allowlist. Deletion additionally requires the exact confirmation `DELETE <resource_id>`. PDF tools require an authorized local `upload_roots` directory and an upload-host allowlist. Generating or installing MCP configuration does not expand these permissions.
+
+Annotation creation supports reviewed sticky-note and single-page-highlight shapes; MCP updates are limited to note/has_note/color_id. The watch window is capped at 30 seconds, but complete scans take additional time. Configure client timeouts accordingly. There is no durable server delta cursor.
+
+## Check the connection
+
+With a valid local session and verified `list_collections` operation, run from the extracted bundle:
 
 ```bash
 .venv/bin/python scripts/smoke_mcp.py --connection-config mcp.local.json
 ```
 
-检查会启动真实子进程，完成 initialize、list_tools、capabilities、Collection 读取及零写入 dry-run。失败返回非零退出码。
+This starts a real subprocess, initializes the protocol, lists tools, reads capabilities and Collections, and checks a zero-write dry-run. Errors produce a nonzero exit status.
 
-此包为本地 stdio 服务，没有公开 HTTP 地址。客户端若只接受远端 HTTP MCP URL，不能直接导入这份本地配置。
+This package exposes **local stdio**, not a public HTTP URL. A client that accepts only remote HTTP MCP endpoints requires a separate deployment or supported bridge. GitHub hosting alone does not provide a running MCP service or transfer authentication to a cloud environment.

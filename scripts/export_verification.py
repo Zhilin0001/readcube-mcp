@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 with ReadCubeClient(Settings.from_toml(ROOT / "readcube.local.toml")) as client:
     capabilities = client.capabilities()
     operations = {}
-    rows = ["| 操作 | 方法 | Host | 路径 | 本轮状态 |", "|---|---|---|---|---|"]
+    rows = ["| Operation | Method | Host | Path | Recorded status |", "|---|---|---|---|---|"]
     for name, status in capabilities.items():
         record = client.registry.records.get(name, {})
         operations[name] = {
@@ -50,7 +50,7 @@ with ReadCubeClient(Settings.from_toml(ROOT / "readcube.local.toml")) as client:
     (ROOT / "docs/api-table.md").write_text(table)
     api = ROOT / "docs/readcube-api.md"
     text = api.read_text()
-    start = text.index("| 操作 | 方法 | Host | 路径 | 本轮状态 |")
+    start = text.index("| Operation | Method | Host | Path | Recorded status |")
     end = text.index("\n\n", start)
     api.write_text(text[:start] + table + text[end:])
     print(

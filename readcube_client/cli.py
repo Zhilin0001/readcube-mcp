@@ -7,6 +7,7 @@ from .client import ReadCubeClient
 from .config import Settings
 from .errors import ReadCubeError
 from .models import WriteAuthorization
+from .workflow import append_note, query_library, workflow_status
 
 
 def emit(value):
@@ -26,6 +27,21 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     for name in ("capabilities", "collections"):
         sub.add_parser(name)
+    p = sub.add_parser("workflow-status")
+    p.add_argument("--collection-id")
+    p = sub.add_parser("query-library")
+    p.add_argument("collection_id")
+    p.add_argument("--query", default="")
+    p.add_argument("--field", choices=["title", "doi", "pmid", "notes", "tags"], default="title")
+    p.add_argument("--read-only", action="store_true")
+    p.add_argument("--annotated-only", action="store_true")
+    p.add_argument("--limit", type=int, default=20)
+    p.add_argument("--max-age-seconds", type=int, default=300)
+    p.add_argument("--refresh", action="store_true")
+    p = sub.add_parser("append-note")
+    p.add_argument("collection_id")
+    p.add_argument("item_id")
+    p.add_argument("text")
     for name in ("lists", "items", "sync"):
         p = sub.add_parser(name)
         p.add_argument("collection_id")
@@ -64,6 +80,31 @@ def main():
             cmd = args.command
             if cmd == "capabilities":
                 result = client.capabilities()
+            elif cmd == "workflow-status":
+                result = workflow_status(client, args.collection_id)
+            elif cmd == "query-library":
+                result = query_library(
+                    client,
+                    args.collection_id,
+                    query=args.query,
+                    field=args.field,
+                    read_only=args.read_only,
+                    annotated_only=args.annotated_only,
+                    limit=args.limit,
+                    max_age_seconds=args.max_age_seconds,
+                    refresh=args.refresh,
+                )
+            elif cmd == "append-note":
+                if args.execute and args.authorize_collection != args.collection_id:
+                    raise ValueError("--authorize-collection must match the target collection")
+                result = append_note(
+                    client,
+                    args.collection_id,
+                    args.item_id,
+                    args.text,
+                    authorized=args.authorize_collection == args.collection_id,
+                    dry_run=not args.execute,
+                )
             elif cmd == "collections":
                 result = client.list_collections()
             elif cmd == "lists":

@@ -15,4 +15,6 @@ research/sources/
 research/private/
 .state/
 *.local.toml
+*.local.toml.*
 *.local.json
+*.local.json.*

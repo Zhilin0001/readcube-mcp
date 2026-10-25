@@ -31,7 +31,7 @@ async def main():
     mappings += [(wheel, wheel.name), (ROOT / "readcube.example.toml", "readcube.example.toml")]
     mappings += [
         (ROOT / "scripts" / name, "scripts/" + name)
-        for name in ["login_local.py", "smoke_mcp.py", "verify_api.py"]
+        for name in ["login_local.py", "smoke_mcp.py", "verify_api.py", "benchmark_mcp.py"]
     ]
     mappings += [
         (ROOT / "docs" / name, "docs/" + name)
@@ -39,6 +39,7 @@ async def main():
             "readcube-api.md",
             "reverse-engineering-report.md",
             "verification-results.json",
+            "performance.md",
         ]
     ]
     portable = []

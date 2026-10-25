@@ -63,6 +63,9 @@ class ReadCubeClient(AbstractContextManager):
             self.http = httpx.Client(
                 cookies=cookies,
                 timeout=self.settings.timeout,
+                limits=httpx.Limits(
+                    max_connections=8, max_keepalive_connections=4, keepalive_expiry=60
+                ),
                 follow_redirects=False,
                 headers={"Accept": "application/json"},
             )
@@ -345,8 +348,13 @@ class ReadCubeClient(AbstractContextManager):
                 params["query"] = query
             data = self._request(name, ids=ids, params=params)
             rows = self._rows(data, "items")
-            if isinstance(data.get("total"), int):
-                expected = data["total"]
+            if "total" in data:
+                total = data["total"]
+                if type(total) is not int or total < 0:
+                    raise PaginationError("Invalid reported total")
+                if expected is not None and total != expected:
+                    raise PaginationError("Reported total changed during pagination")
+                expected = total
             for row in rows:
                 item = self._item({"item": row})
                 if item["id"] in seen_ids:
@@ -355,6 +363,10 @@ class ReadCubeClient(AbstractContextManager):
                 received += 1
                 item.setdefault("collection_id", collection_id)
                 yield item
+            if expected is not None and received >= expected:
+                if received > expected:
+                    raise PaginationError("Received more items than reported total")
+                return
             if not rows:
                 if expected is not None and received < expected:
                     raise PaginationError("Pagination ended before reported total")
@@ -372,6 +384,25 @@ class ReadCubeClient(AbstractContextManager):
 
     def list_items(self, collection_id: str, **kwargs) -> list[dict]:
         return list(self.iter_items(collection_id, **kwargs))
+
+    def count_items(self, collection_id: str) -> dict:
+        """Read the server's reported total with one verified one-item request."""
+        data = self._request(
+            "list_items",
+            ids={"collection_id": collection_id},
+            params={"size": 1, "sort[]": "created,asc"},
+        )
+        rows = self._rows(data, "items")
+        total = data.get("total")
+        if type(total) is not int or total < len(rows):
+            raise ProtocolError("list_items: missing or invalid total; use a complete scan")
+        return {
+            "collection_id": collection_id,
+            "total": total,
+            "source": "live_server_total",
+            "as_of": datetime.now(UTC).isoformat(),
+            "complete_scan": False,
+        }
 
     def get_item(self, collection_id: str, item_id: str) -> dict:
         return self._item(
@@ -402,6 +433,47 @@ class ReadCubeClient(AbstractContextManager):
 
     def find_by_doi(self, doi: str, collection_id: str | None = None):
         return self.search(doi, field="doi", collection_id=collection_id)
+
+    def cached_search(
+        self,
+        query: str,
+        *,
+        field: str = "title",
+        collection_id: str | None = None,
+        max_age_seconds: int = 300,
+        refresh: bool = False,
+    ):
+        """Legacy raw results from the shared index, with explicit per-result provenance.
+
+        Import deduplication deliberately keeps using the live ``search`` method.
+        Use workflow.query_library for bounded compact results and zero-match counts.
+        """
+        from .workflow import cached_library_items
+
+        if field not in ("title", "doi", "pmid") or not query.strip():
+            raise ValueError("Nonempty query and field title/doi/pmid required")
+        target = normalize_doi(query) if field == "doi" else query.strip().casefold()
+        collections = [{"id": collection_id}] if collection_id else self.list_collections()
+        results = []
+        for collection in collections:
+            items, metadata = cached_library_items(
+                self, collection["id"], max_age_seconds=max_age_seconds, refresh=refresh
+            )
+            for item in items:
+                value = (
+                    (item.get("article") or {}).get("title", "")
+                    if field == "title"
+                    else (item.get("ext_ids") or {}).get(field, "")
+                )
+                if field == "doi":
+                    try:
+                        value = normalize_doi(str(value))
+                    except ValueError:
+                        continue
+                value = str(value).strip().casefold()
+                if (target in value) if field == "title" else (target == value):
+                    results.append(item | {"_readcube_cache": metadata})
+        return results
 
     def find_by_title(self, title: str, collection_id: str | None = None):
         return self.search(title, field="title", collection_id=collection_id)
@@ -437,7 +509,33 @@ class ReadCubeClient(AbstractContextManager):
                 body=body or {},
             )
         self._check_authorization(collection_id, authorization, delete_target)
-        return self._request(name, ids=ids, body=body)
+        self._require(name)
+        from .workflow import (
+            invalidate_library_cache,
+            library_cache_lock,
+            patch_library_cache,
+        )
+
+        # Coordinate with scans/other local writers. A lost response may still
+        # represent a committed write, so uncertain writes invalidate the index.
+        with library_cache_lock(self, collection_id):
+            try:
+                result = self._request(name, ids=ids, body=body)
+            except BaseException:
+                invalidate_library_cache(self, collection_id)
+                raise
+            saved = result.get("item") or {}
+            if (
+                name == "update_notes"
+                and saved.get("id") == ids["item_id"]
+                and (saved.get("user_data") or {}).get("notes") == body["notes"]
+            ):
+                patch_library_cache(
+                    self, collection_id, ids["item_id"], user_data_patch={"notes": body["notes"]}
+                )
+            else:
+                invalidate_library_cache(self, collection_id)
+            return result
 
     def _check_authorization(self, collection_id, authorization, delete_target=None):
         if (
@@ -870,6 +968,8 @@ class ReadCubeClient(AbstractContextManager):
         return {"item": item, "sha256": digest, "associated": True}
 
     def sync_changes(self, collection_id: str) -> SyncDelta:
+        from .workflow import cached_library_items
+
         identifier(collection_id)
         path = self.settings.state_dir / self.session / f"{collection_id}.json"
         previous = json.loads(path.read_text()) if path.exists() else {}
@@ -878,7 +978,7 @@ class ReadCubeClient(AbstractContextManager):
             item["id"]: hashlib.sha256(
                 json.dumps(item, sort_keys=True, ensure_ascii=False).encode()
             ).hexdigest()
-            for item in self.iter_items(collection_id)
+            for item in cached_library_items(self, collection_id, refresh=True)[0]
         }
         delta = SyncDelta(
             added=sorted(current.keys() - previous.keys()),

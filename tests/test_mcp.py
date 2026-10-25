@@ -16,7 +16,8 @@ def test_mcp_contract_and_unverified_dryrun(make_client):
         by_name = {tool.name: tool for tool in tools}
         assert "readcube_search_papers" in by_name
         assert "readcube_upload_pdf" in by_name
-        assert len(tools) == 27
+        assert len(tools) == 31
+        assert by_name["readcube_count_papers"].annotations.read_only_hint is True
         assert all(tool.output_schema for tool in tools)
         assert by_name["readcube_delete_paper"].annotations.destructive_hint is True
         for name in ("readcube_delete_annotation", "readcube_delete_smartlist"):

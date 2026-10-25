@@ -95,7 +95,7 @@ Illustrative response:
 }
 ```
 
-Read until an empty page or the absence of a cursor. A missing cursor before the advertised total raises an error. Elasticsearch can reuse a cursor while advancing, so the SDK checks duplicate item IDs and a maximum page count rather than rejecting a repeated cursor alone. Search `query` is sent on the first page only.
+Read until the stable, nonnegative integer `total` is reached, an empty page arrives, or the cursor is absent. Reaching `total` avoids an unnecessary terminal request; changing totals or receiving excess records raises a pagination error. A missing cursor before the advertised total raises an error. Elasticsearch can reuse a cursor while advancing, so the SDK checks duplicate item IDs and a maximum page count rather than rejecting a repeated cursor alone. Search `query` is sent on the first page only.
 
 A forced live `size=1` test retrieved two valid records in three GETs, including the terminal empty page. The historical blog's `scoll_id` spelling conflicts with the Gist, Python implementation, frontend, and live responses; the implemented parameter is **`scroll_id`**.
 
@@ -111,7 +111,7 @@ A single-reference response is `{"item":{...}}`. The SDK preserves nested and un
 | `list_ids` | List membership |
 | `seq`, `deleted` | Change/deletion-related fields; not an established delta protocol |
 
-SDK search performs complete pagination followed by exact normalized DOI/PMID matching or a case-insensitive title substring match. Complex server query syntax has not been exhaustively verified and is not assumed for deduplication.
+SDK `search()` performs complete pagination followed by exact normalized DOI/PMID matching or a case-insensitive title substring match. MCP search uses a session- and contract-scoped cache with explicit freshness metadata; import deduplication still uses the live SDK method. `count_items()` reads the server total using a verified `size=1` request. Complex server query syntax has not been exhaustively verified and is not assumed for deduplication.
 
 ## Import identifiers and create metadata records
 
@@ -232,7 +232,7 @@ The frontend uses Bayeux handshake, `/meta/subscribe`, and `/meta/connect`, with
 
 `watch_changes`/`watch_library` reconcile through complete scans after connection, notification, gaps, periodically, and at completion. Their mode is `notification_assisted_full_scan`; no durable cursor or replay contract has been established.
 
-`sync_changes` uses `full_scan_local_diff`, returning added/changed/missing/total. It atomically replaces the previous local snapshot only after complete pagination succeeds. A missing item may reflect access, indexing, or concurrent changes rather than proven server deletion.
+`sync_changes` uses `full_scan_local_diff`, returning added/changed/missing/total. It refreshes the shared query index and atomically replaces the fingerprint snapshot only after complete pagination succeeds. A missing item may reflect access, indexing, or concurrent changes rather than proven server deletion.
 
 | Condition | SDK behavior |
 |---|---|

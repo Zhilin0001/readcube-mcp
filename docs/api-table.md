@@ -43,4 +43,4 @@
 
 | Operation | Method | Path | Evidence | Live status |
 |---|---|---|---|---|
-| `files_with_urls` | GET | `/collections/{collection_id}/items/files_with_urls` | Frontend `getFilesWithURLs`, repeated `item_ids[]` | UNVERIFIED; live check deferred by owner |
+| `files_with_urls` | GET | `/collections/{collection_id}/items/files_with_urls` | Frontend `getFilesWithURLs`, repeated `item_ids[]` | Live original-byte/hash check passed locally on October 26; per-session verification required |

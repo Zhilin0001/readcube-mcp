@@ -62,6 +62,16 @@ def _allowed_url(client, url):
 
 
 def _download(client, url, destination, expected):
+    for attempt in range(client.settings.retries + 1):
+        try:
+            return _download_once(client, url, destination, expected)
+        except TransportError:
+            if attempt >= client.settings.retries:
+                raise
+            time.sleep(min(0.25 * 2**attempt, 2))
+
+
+def _download_once(client, url, destination, expected):
     url = _allowed_url(client, url)
     destination.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
     fd, temp = tempfile.mkstemp(dir=destination.parent, prefix=".part-")
@@ -74,8 +84,10 @@ def _download(client, url, destination, expected):
                     response = client.http.send(
                         request, stream=True, auth=None, follow_redirects=False
                     )
-                except httpx.TransportError:
-                    raise TransportError("PDF storage download failed") from None
+                except httpx.TransportError as error:
+                    raise TransportError(
+                        "PDF storage download failed (" + type(error).__name__ + ")"
+                    ) from None
                 with closing(response):
                     if response.status_code in (301, 302, 303, 307, 308):
                         target = response.headers.get("location", "")

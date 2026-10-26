@@ -8,7 +8,7 @@ from .auth import private_json_write
 from .client import identifier, normalize_doi
 from .errors import ProtocolError, ReadCubeError
 from .models import WriteAuthorization
-from .workflow import library_cache_lock
+from .workflow import _state_lock
 
 ARTICLE_FIELDS = {
     "title",
@@ -96,7 +96,10 @@ def batch_update_metadata(
     journal = {"at": datetime.now(UTC).isoformat(), "collection_id": collection_id, "results": []}
     path = client.settings.state_dir / "metadata-journals" / (uuid.uuid4().hex + ".json")
     # Read and validate all targets before the first write; no implicit whole-library scan.
-    with library_cache_lock(client, collection_id):
+    # Serialize metadata batches without holding the shared query/note cache lock
+    # across every network read in a potentially large batch. Each actual PATCH
+    # still uses the SDK's short cache/write lock and invalidation protocol.
+    with _state_lock(client, collection_id, ".metadata-batch.lock"):
         originals = {iid: client.get_item(collection_id, iid) for iid, _ in parsed}
         journal["before"] = originals
         private_json_write(path, journal)
@@ -117,7 +120,16 @@ def batch_update_metadata(
                     for k, v in values.items()
                 ):
                     raise ProtocolError("Metadata read-back mismatch")
-                for key in ("files", "user_data", "list_ids"):
+                # ReadCube updates its audit timestamp when metadata changes.
+                # Preserve every content field, but do not mistake this timestamp
+                # for a lost note, tag, flag, attachment or List membership.
+                old_user = originals[iid].get("user_data") or {}
+                new_user = saved.get("user_data") or {}
+                if {k: v for k, v in old_user.items() if k != "modified"} != {
+                    k: v for k, v in new_user.items() if k != "modified"
+                }:
+                    raise ProtocolError("Unrelated user content changed during metadata update")
+                for key in ("files", "list_ids"):
                     if saved.get(key) != originals[iid].get(key):
                         raise ProtocolError(
                             "Unrelated record fields changed during metadata update"

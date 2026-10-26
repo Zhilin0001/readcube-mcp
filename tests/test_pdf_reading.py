@@ -216,3 +216,23 @@ def test_concurrent_downloads_share_one_original_transfer(pdf_client):
         results = list(pool.map(run, range(2)))
     assert {r["cached"] for r in results} == {False, True}
     assert sum(r.url.host == "s3.amazonaws.com" for r in calls) == 1
+
+
+def test_original_storage_get_retries_transient_connection_failure(pdf_client):
+    client, _, _, content, sha = pdf_client
+    from readcube_client.pdf import _download
+
+    client.settings.retries = 1
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        if len(calls) == 1:
+            raise httpx.ConnectError("Synthetic transient failure")
+        return httpx.Response(200, content=content)
+
+    client.http._transport = httpx.MockTransport(handler)
+    target = client.settings.state_dir / "recovered.pdf"
+    _download(client, "https://s3.amazonaws.com/paper", target, sha)
+    assert len(calls) == 2 and target.read_bytes() == content
+    assert not list(target.parent.glob(".part-*"))

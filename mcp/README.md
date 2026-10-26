@@ -1,4 +1,4 @@
-# ReadCube MCP 0.3.0
+# ReadCube MCP 0.3.1
 
 A Python 3.11+ local stdio MCP server with **41 tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
@@ -24,7 +24,7 @@ From the repository root, with the `dev` dependencies installed:
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Extract `dist/readcube-mcp-0.3.0.zip`, enter the extracted directory, and run:
+Extract `dist/readcube-mcp-0.3.1.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh
@@ -67,4 +67,4 @@ This package exposes **local stdio**, not a public HTTP URL. A client that accep
 
 ## PDF, author and batch workflows
 
-Version 0.3.0 adds original downloads, paginated text reading, cached author search/statistics, DOI-aware CSV/RIS/BibTeX export, batch metadata updates, full-text indexing/search and expiring file resources. See [the workflow guide](../docs/library-tools.md). The new PDF URL endpoint remains unverified until the read-only live check succeeds for your session. Compatible ChatGPT hosts can show a user-clicked native upload widget; unsupported clients keep the download link. Only the host can confirm the uploaded file ID. This client integration still needs online testing.
+Version 0.3.1 adds original downloads, paginated text reading, cached author search/statistics, DOI-aware CSV/RIS/BibTeX export, batch metadata updates, full-text indexing/search and expiring file resources. See [the workflow guide](../docs/library-tools.md). Original downloads passed local live verification on October 26; each new session still requires its own read-only semantic check. Compatible ChatGPT hosts can show a user-clicked native upload widget; unsupported clients keep the download link. Only the host can confirm the uploaded file ID. Native ChatGPT upload remains untested because the connected cloud backend is still older.

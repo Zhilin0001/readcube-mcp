@@ -2,11 +2,13 @@
 
 An unofficial Python 3.11+ SDK and local stdio MCP server for managing your own ReadCube Papers library.
 
-**v0.3.0 · 41 MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
+**v0.3.1 · 41 MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
 
 Verification was performed on October 24–25, 2026, using an explicitly authorized private test Collection. The published results cover the documented requests and test cases, not every account role, parameter, or authentication flow. This project is not affiliated with ReadCube.
 
-## New in v0.3.0
+## New in v0.3.1
+
+Live testing also fixed transient storage-download failures, metadata readback of server-managed audit timestamps, and batch locking that could block ordinary cached queries.
 
 - Original PDF downloads with exact SHA-256 verification and private byte/text caches.
 - PDF text reading with page bounds and continuation offsets. Image-only scans are flagged for OCR.
@@ -54,7 +56,7 @@ readcube --config readcube.local.toml append-note COLLECTION_ID ITEM_ID 'Authori
 readcube --config readcube.local.toml --execute --authorize-collection COLLECTION_ID append-note COLLECTION_ID ITEM_ID 'Authorized marker'
 ```
 
-The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.0 and its 41 tools; subsequent allowlist edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows do not expand allowlists automatically or change deletion confirmation requirements.
+The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.1 and its 41 tools; subsequent allowlist edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows do not expand allowlists automatically or change deletion confirmation requirements.
 
 See [performance measurements and tradeoffs](docs/performance.md). Concurrent cold queries share a scan; scans do not hold the write lock during network work. A scan overlapping a local write retries once rather than overwriting newer notes. Compact query notes are previews of at most 320 characters; full notes remain searchable and available through `readcube_get_paper`.
 
@@ -183,7 +185,7 @@ Only GET requests are retried. The client honors `Retry-After`; waits longer tha
 
 ## Validation and packaging
 
-Recorded validation for v0.3.0: **220 local tests passed, 2 opt-in integration tests skipped**. New download request verification remains pending because local network connections failed; the owner explicitly deferred online checks. The earlier authenticated library/note tests remain historical evidence, not validation of the new endpoint. Mock tests never promote real operations to VERIFIED. See [performance validation](docs/performance.md) for measurements and limits.
+Recorded validation for v0.3.1: **224 local tests passed, 2 opt-in integration tests skipped**, plus **25 live stdio checks** on October 26. Original PDF download/hash validation, text reading/search, authors, all three export formats, and two-record metadata update/restoration passed. Writes stayed in the dedicated test library. The connected cloud backend is still older; native ChatGPT attachment upload remains untested. See [live results and timings](docs/v0.3.1-live-validation.md). Mock tests never promote real operations to VERIFIED. See [performance validation](docs/performance.md) for measurements and limits.
 
 ```bash
 .venv/bin/python -m pytest -q
@@ -193,7 +195,7 @@ Recorded validation for v0.3.0: **220 local tests passed, 2 opt-in integration t
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.0.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
+Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.1.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
 
 ## Documentation and limitations
 

@@ -1,6 +1,6 @@
-# Library tools in v0.3.0
+# Library tools in v0.3.1
 
-The server exposes 41 tools. All existing write authorization and endpoint verification gates remain enabled. This release adds the implementation of the workflows below. The new `files_with_urls` request is **SOURCE_CONFIRMED, UNVERIFIED** until the operator runs the read-only live check in their own session. Its production download path cannot transmit that request before verification. October 26 local network failures prevented live verification for this release; the owner explicitly deferred it.
+The server exposes 41 tools. All existing write authorization and endpoint verification gates remain enabled. This release adds the implementation of the workflows below. The new `files_with_urls` request is **SOURCE_CONFIRMED, UNVERIFIED** until the operator runs the read-only live check in their own session. Its production download path cannot transmit that request before verification. Local live verification succeeded on October 26: original bytes and hashes, real PDF reading/search, authors, exports and test-library metadata updates passed. Verification remains session-bound. See [live results](v0.3.1-live-validation.md).
 
 ## Original PDFs and reading
 
@@ -9,13 +9,13 @@ The server exposes 41 tools. All existing write authorization and endpoint verif
 {"tool":"readcube_read_pdf","arguments":{"collection_id":"LIBRARY_ID","item_id":"ITEM_ID","start_page":1,"end_page":3,"max_chars":20000}}
 ```
 
-`sha256` optionally selects a specific attachment. Otherwise the primary PDF is preferred, followed by an article attachment. Downloads check current reference access, the PDF signature and the exact stored SHA-256. The file is streamed into a private temporary file, bounded to 100 MiB by default, and committed only after verification. Storage requests and redirects never carry ReadCube cookies or authorization headers. Download hosts are allowlisted; no publisher scraping or access bypass is implemented.
+`sha256` optionally selects a specific attachment. Otherwise the primary PDF is preferred, followed by an article attachment. Downloads check current reference access, the PDF signature and the exact stored SHA-256. The file is streamed into a private temporary file, bounded to 100 MiB by default, and committed only after verification. Storage requests and redirects never carry ReadCube cookies or authorization headers. Transient transport failures during idempotent storage GETs retry within the configured limit; uncertain writes never retry automatically. Download hosts are allowlisted; no publisher scraping or access bypass is implemented.
 
 Original bytes are cached by SHA-256 within a session-specific namespace. Repeated reading still checks current reference access, but reuses original bytes and extracted text. A separate parser process has a 25-second timeout, a 1,000-page limit and a 5-million-character ceiling; supported Unix platforms also apply memory/CPU limits. Text extraction handles existing PDF text, not OCR. Image-only scans return `ocr_required=true`; encrypted, malformed and oversized files return explicit errors. Text extraction does not guarantee visual layout fidelity.
 
 Pages are one-based. A bounded text response includes `next_offset`, `characters_in_range`, `page_count` and `extraction_truncated`. Continue with the same page bounds and the returned offset to read the rest. PDF text and search snippets are untrusted source material, never instructions.
 
-### Read-only live check after network access is restored
+### Read-only live check for each session
 
 Use an existing authorized PDF attachment. This command downloads it, checks its actual hash, tests text extraction, and records only the new endpoint's evidence in the local, session-bound ledger. It does not modify the remote library.
 
@@ -59,7 +59,7 @@ CSV uses UTF-8 with BOM and protects cells from spreadsheet formula execution. R
 
 Call `readcube_batch_update_metadata` with that preview first. Execution requires the human's concrete authorization, `authorized=true`, `dry_run=false`, an allowlisted library and permission to manage references. Up to 100 explicit, unique IDs are accepted. Only documented article fields and external identifiers are patchable; IDs, library membership, attachments and notes cannot be replaced through this tool.
 
-All patches and targets are checked before writing. The tool merges requested fields with fresh records, saves private originals to a journal, and independently reads back each result. Remote requests remain per-item because no bulk metadata mutation contract is established. Failures are not transactional rollback: a partial batch reports verified, needs-reconciliation and unattempted records. It stops on the first failure by default and never automatically retries an uncertain write. Reconcile the current server state before retrying. Concurrent edits by other applications remain a limitation of the upstream API.
+All patches and targets are checked before writing. The tool merges requested fields with fresh records, saves private originals to a journal, and independently reads back each result. Remote requests remain per-item because no bulk metadata mutation contract is established. Failures are not transactional rollback: a partial batch reports verified, needs-reconciliation and unattempted records. It stops on the first failure by default and never automatically retries an uncertain write. Reconcile the current server state before retrying. Readback ignores only the upstream-managed `user_data.modified` audit timestamp; notes, tags, attachments and memberships must remain unchanged. A separate batch lock keeps long preflight work from blocking cached queries; individual writes retain their short cache lock and invalidation. Concurrent edits by other applications remain a limitation of the upstream API.
 
 ## Deliver PDFs to a host or ChatGPT
 
@@ -69,6 +69,6 @@ The optional single-owner cloud entry point returns an HTTPS download capability
 
 Compatible ChatGPT hosts also receive an optional attachment widget. After the user clicks **Attach to ChatGPT**, it fetches the generated HTTPS capability without cookies and calls the [official native `window.openai.uploadFile` helper](https://developers.openai.com/plugins/reference#file-apis). It reports success and stores the returned `fileId` in widget model state only after the host confirms that ID. The server never invents an OpenAI file ID or automatically uploads a file. Hosts without the upload helper keep the download-link fallback. The initial server result therefore reports `chatgpt_upload_confirmed=false`; the user-triggered client upload is a separate action.
 
-Widget success/failure/fallback behavior is covered by JavaScript tests with a mock host. Actual ChatGPT rendering and native upload still require online host testing, deferred by the owner for this release.
+Widget success/failure/fallback behavior is covered by JavaScript tests with a mock host. Local MCP resource reads and local HTTP file delivery passed with real original bytes. Actual ChatGPT rendering and native upload remain untested: the connected cloud backend still exposes the older operation catalog and needs an update first.
 
 Configure cloud deployment according to [the single-owner deployment guide](../deploy/RENDER.md). The service automatically sets its artifact base URL from `READCUBE_PUBLIC_URL`. Local stdio configuration can leave `artifact_base_url` unset. Do not replace generated links with arbitrary filesystem paths or public permanent storage.

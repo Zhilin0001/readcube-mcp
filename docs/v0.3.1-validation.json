@@ -1,0 +1,199 @@
+{
+  "release_version": "0.3.1",
+  "live_server_version": "0.3.0 with storage and readback fixes",
+  "date": "2026-10-26",
+  "transport": "real_stdio",
+  "mcp_tools": 41,
+  "live_checks_passed": 25,
+  "offline_tests_passed": 224,
+  "opt_in_integration_tests_skipped": 2,
+  "test_scope": "Production read-only; metadata writes restricted to two existing synthetic test-library records, restored and independently reread.",
+  "live_checks": [
+    {
+      "test": "initialize",
+      "passed": true,
+      "seconds": 0,
+      "tools": 41
+    },
+    {
+      "test": "pdf_endpoint_verification",
+      "passed": true,
+      "seconds": 0,
+      "status": "VERIFIED"
+    },
+    {
+      "test": "author_query_cold",
+      "passed": true,
+      "seconds": 19.1555,
+      "matched": 19,
+      "source": "live_full_scan"
+    },
+    {
+      "test": "author_query_warm_1",
+      "passed": true,
+      "seconds": 0.0057,
+      "matched": 19,
+      "source": "cache"
+    },
+    {
+      "test": "author_query_warm_2",
+      "passed": true,
+      "seconds": 0.004,
+      "matched": 19,
+      "source": "cache"
+    },
+    {
+      "test": "author_query_warm_3",
+      "passed": true,
+      "seconds": 0.0038,
+      "matched": 19,
+      "source": "cache"
+    },
+    {
+      "test": "author_statistics",
+      "passed": true,
+      "seconds": 0.0254,
+      "records": 19,
+      "unique": 19
+    },
+    {
+      "test": "author_query_statistics_agree",
+      "passed": true,
+      "seconds": 0
+    },
+    {
+      "test": "doi_dedup_statistics",
+      "passed": true,
+      "seconds": 0.0235,
+      "records": 419,
+      "unique": 409,
+      "duplicate_groups": 10
+    },
+    {
+      "test": "author_name_normalization",
+      "passed": true,
+      "seconds": 0.0013
+    },
+    {
+      "test": "export_csv",
+      "passed": true,
+      "seconds": 0.0299,
+      "records": 409,
+      "bytes": 722657
+    },
+    {
+      "test": "export_ris",
+      "passed": true,
+      "seconds": 0.0281,
+      "records": 409,
+      "bytes": 759089
+    },
+    {
+      "test": "export_bibtex",
+      "passed": true,
+      "seconds": 0.3478,
+      "records": 409,
+      "bytes": 768063
+    },
+    {
+      "test": "real_paper_original_download",
+      "passed": true,
+      "seconds": 0.4281,
+      "bytes": 499357,
+      "cached": true
+    },
+    {
+      "test": "original_download_cached",
+      "passed": true,
+      "seconds": 0.4222,
+      "cached": true
+    },
+    {
+      "test": "real_pdf_fulltext_read",
+      "passed": true,
+      "seconds": 0.4231,
+      "pages": 13,
+      "characters_returned": 20000,
+      "text_cached": true,
+      "ocr_required": false
+    },
+    {
+      "test": "real_pdf_text_cached",
+      "passed": true,
+      "seconds": 0.4195,
+      "characters_returned": 2000,
+      "next_offset": 2000,
+      "text_cached": true
+    },
+    {
+      "test": "index_real_pdf",
+      "passed": true,
+      "seconds": 0.0207,
+      "complete": true
+    },
+    {
+      "test": "search_real_pdf",
+      "passed": true,
+      "seconds": 0.0174,
+      "hits": 5,
+      "pages": [
+        11,
+        1,
+        12,
+        13,
+        8
+      ]
+    },
+    {
+      "test": "prepare_file_resource",
+      "passed": true,
+      "seconds": 0.4213
+    },
+    {
+      "test": "mcp_resource_original_bytes",
+      "passed": true,
+      "seconds": 0.0141,
+      "bytes": 499357
+    },
+    {
+      "test": "real_local_http_file_delivery",
+      "passed": true,
+      "seconds": 0.0148,
+      "bytes": 499357,
+      "cache_control": "no-store"
+    },
+    {
+      "test": "batch_metadata_preview",
+      "passed": true,
+      "seconds": 0.0067
+    },
+    {
+      "test": "batch_metadata_execute",
+      "passed": true,
+      "seconds": 3.9472,
+      "records": 2,
+      "verified": true
+    },
+    {
+      "test": "batch_metadata_restored",
+      "passed": true,
+      "seconds": 0,
+      "records": 2
+    }
+  ],
+  "initial_uncached_successful_measurements": {
+    "full_library_author_scan_seconds": 6.1142,
+    "original_pdf_download_seconds": 3.3862,
+    "pdf_extraction_seconds": 0.9799,
+    "pdf_index_seconds": 0.4517
+  },
+  "fixed_regressions": [
+    "Retry bounded idempotent storage GET transport failures",
+    "Accept only upstream user_data.modified audit timestamp changes",
+    "Separate metadata-batch lock from query cache lock"
+  ],
+  "last_lock_scope_change_validation": "Deterministic concurrent regression test; included in 224 passing tests. No extra remote writes repeated for the lock-only change.",
+  "cloud_backend": "Observed older 38-operation catalog; not upgraded in this test",
+  "native_chatgpt_upload": "NOT_TESTED: remote backend still older",
+  "local_delivery": "Real MCP resource bytes and localhost HTTP capability delivery passed; neither proves remote ChatGPT native upload."
+}

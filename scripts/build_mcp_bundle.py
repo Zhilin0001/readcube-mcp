@@ -49,6 +49,8 @@ async def main():
             "verification-results.json",
             "performance.md",
             "library-tools.md",
+            "v0.3.1-live-validation.md",
+            "v0.3.1-validation.json",
         ]
     ]
     portable = []

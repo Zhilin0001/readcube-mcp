@@ -7,3 +7,8 @@ write_collections = []
 upload_hosts = ["sync.readcube.com", "s3.amazonaws.com"]
 upload_roots = []
 # Session and ledger use ~/.config/readcube-client/ by default.
+
+# Original downloads: private SHA-256-verified cache, no upload permissions needed.
+download_hosts = ["sync.readcube.com", "*.amazonaws.com", "*.cloudfront.net"]
+max_pdf_bytes = 104857600
+# artifact_base_url is set automatically by the optional cloud entry point.

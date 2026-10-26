@@ -268,6 +268,24 @@ def verify(args):
             all(isinstance(i["id"], str) for i in members),
             "List item response parsed and membership present",
         )
+        parent_name = list_name + " parent"
+        client.create_list(collection_id, parent_name, dry_run=True)
+        parent_list = client.create_list(collection_id, parent_name, **writes)["list"]
+        private_json_write(
+            output.with_suffix(".move-list-resources.json"),
+            {"collection_id": collection_id, "parent_id": parent_list["id"], "child_id": list_id},
+        )
+        client.move_list(collection_id, list_id, parent_list["id"], dry_run=True)
+        moved = client.move_list(collection_id, list_id, parent_list["id"], **writes)
+        client.move_list(collection_id, list_id, None, dry_run=True)
+        restored = client.move_list(collection_id, list_id, None, **writes)
+        checked(
+            "move_list",
+            moved["verified"] and restored["verified"]
+            and {i["id"] for i in client.list_items(collection_id, list_id=list_id)}
+            == {i["id"] for i in members},
+            "List nested and returned to root; name and reference memberships preserved",
+        )
         client.remove_from_list(collection_id, list_id, synthetic_id, **writes)
         checked(
             "remove_from_list",

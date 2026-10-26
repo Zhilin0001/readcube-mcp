@@ -17,7 +17,7 @@ from weakref import WeakValueDictionary
 from .errors import ProtocolError
 from .models import WriteAuthorization
 
-_CACHE_VERSION = 2
+_CACHE_VERSION = 3
 _NOTE_PREVIEW_LENGTH = 320
 _LOCKS = WeakValueDictionary()
 _LOCKS_GUARD = threading.Lock()
@@ -174,11 +174,16 @@ def invalidate_library_cache(client, collection_id):
 
 
 def _compact(item):
+    from .authors import author_names
+
     article, user = item.get("article") or {}, item.get("user_data") or {}
+    names = author_names(article)
     ext_ids = item.get("ext_ids") or {}
     return {
         "id": item["id"],
         "title": article.get("title", ""),
+        "authors": [a["display"] for a in names],
+        "author_keys": [a["key"] for a in names],
         "year": article.get("year"),
         "journal": article.get("journal"),
         "doi": ext_ids.get("doi"),
@@ -313,6 +318,7 @@ def _read_sort_key(item):
 
 def _preview(item):
     result = copy.deepcopy(item)
+    result.pop("author_keys", None)
     notes = str(result["notes"])
     result["notes"] = notes[:_NOTE_PREVIEW_LENGTH]
     result["notes_truncated"] = len(notes) > _NOTE_PREVIEW_LENGTH
@@ -332,11 +338,15 @@ def query_library(
     refresh=False,
 ):
     """A complete scan on cache miss, then bounded local queries; never label cache as live."""
-    if field not in ("title", "doi", "pmid", "notes", "tags"):
+    if field not in ("title", "doi", "pmid", "notes", "tags", "author"):
         raise ValueError("Unsupported query field")
     if not 1 <= limit <= 100:
         raise ValueError("Invalid limit")
     target = query.strip().casefold()
+    if field == "author":
+        from .authors import normalize_author
+
+        target = normalize_author(query)["key"]
     if field == "doi":
         from .client import normalize_doi
 
@@ -350,6 +360,14 @@ def query_library(
         if read_only and item.get("unread") is not False:
             continue
         if annotated_only and not item.get("has_annotations"):
+            continue
+        if field == "author":
+            from .authors import author_key_matches, name_key
+
+            keys = item.get("author_keys") or [name_key(n) for n in item.get("authors", [])]
+            if target and not any(author_key_matches(key, target) for key in keys):
+                continue
+            matches.append(item)
             continue
         value = item.get(field) or ""
         if field == "tags":

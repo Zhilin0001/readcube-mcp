@@ -4,16 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "readcube-agent-client"
-version = "0.2.1"
+version = "0.3.0"
 description = "Evidence-gated unofficial ReadCube Papers SDK and MCP server"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["httpx>=0.28,<0.29", "pydantic>=2.10,<3", "pydantic-settings>=2.7,<3"]
+dependencies = ["httpx>=0.28,<0.29", "pydantic>=2.10,<3", "pydantic-settings>=2.7,<3", "pypdf>=6,<7"]
 
 [project.optional-dependencies]
 mcp = ["mcp>=2.3,<3"]
 realtime = ["websockets>=15,<17"]
-dev = ["pytest>=8,<10", "ruff>=0.9", "build>=1.2"]
+cloud = ["mcp>=2.3,<3", "uvicorn>=0.34,<1", "PyJWT[crypto]>=2.10,<3"]
+dev = ["pytest>=8,<10", "ruff>=0.9", "build>=1.2", "bibtexparser>=1.4,<2", "rispy>=0.9,<1"]
 
 [project.scripts]
 readcube = "readcube_client.cli:main"

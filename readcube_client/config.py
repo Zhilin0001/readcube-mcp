@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     upload_hosts: list[str] = Field(default_factory=lambda: ["sync.readcube.com"])
     upload_roots: list[Path] = Field(default_factory=list)
     upload_timeout: float = Field(default=120, gt=0, le=600)
+    download_hosts: list[str] = Field(default_factory=lambda: [
+        "sync.readcube.com", "*.amazonaws.com", "*.cloudfront.net",
+    ])
+    max_pdf_bytes: int = Field(default=100 * 1024 * 1024, ge=1024, le=500 * 1024 * 1024)
+    artifact_base_url: str | None = None
 
     @field_validator("session_file", "verification_file", "state_dir", mode="after")
     @classmethod

@@ -2,9 +2,22 @@
 
 An unofficial Python 3.11+ SDK and local stdio MCP server for managing your own ReadCube Papers library.
 
-**v0.2.1 · 31 MCP tools · 38 cataloged API operations and workflows with live verification evidence.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
+**v0.3.0 · 41 MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
 
 Verification was performed on October 24–25, 2026, using an explicitly authorized private test Collection. The published results cover the documented requests and test cases, not every account role, parameter, or authentication flow. This project is not affiliated with ReadCube.
+
+## New in v0.3.0
+
+- Original PDF downloads with exact SHA-256 verification and private byte/text caches.
+- PDF text reading with page bounds and continuation offsets. Image-only scans are flagged for OCR.
+- Cached author search, per-name statistics and exact-DOI deduplication without deleting references.
+- Batch CSV, RIS and BibTeX exports as file resources.
+- Authorized batch metadata patches with private originals, per-item read-back and partial-failure reports.
+- Incremental full-text indexing across article/supplement PDFs, English/Chinese search and page snippets.
+- Expiring file-resource delivery to compatible hosts; optional HTTPS download capabilities for cloud use. Compatible ChatGPT clients get a user-clicked native upload button, with a download fallback; actual host integration remains to be tested online.
+- Conservative author-name formatting without expanding initials or merging people.
+
+See [examples, verification command, performance boundaries and file-delivery limitations](docs/library-tools.md). The new PDF URL request is SOURCE_CONFIRMED but remains UNVERIFIED until `scripts/verify_pdf.py` succeeds in the operator's own session. Mock tests do not unlock production endpoints.
 
 ## Features
 
@@ -18,7 +31,11 @@ Verification was performed on October 24–25, 2026, using an explicitly authori
 - Detect changes through complete scans, optionally triggered by Bayeux notifications.
 - Return structured JSON to agents, with dry-run plans, write allowlists, and separate deletion confirmation.
 
-The SDK catalog contains 38 operations/workflows; the MCP server groups its supported functionality into 31 tools. SDK-only methods, such as primary-file selection, are not automatically exposed as MCP tools.
+The SDK catalog contains 40 operations/workflows; the MCP server groups its supported functionality into 41 tools, including local cached workflows. SDK-only methods, such as primary-file selection, are not automatically exposed as MCP tools.
+
+## List organization in v0.2.2
+
+`readcube_move_list(collection_id, list_id, parent_id)` moves an existing List within its library; `parent_id=null` moves it to the root. It preserves the name and reference memberships, rejects self/descendant cycles and missing or foreign-library parents, and verifies the saved parent with an independent read. Dry-run, explicit authorization and the Collection allowlist still apply. A new process is needed to load the additional tool. The new operation remains UNVERIFIED on other installations until separately checked in their session-scoped ledger.
 
 ## Fast local library workflows
 
@@ -37,7 +54,7 @@ readcube --config readcube.local.toml append-note COLLECTION_ID ITEM_ID 'Authori
 readcube --config readcube.local.toml --execute --authorize-collection COLLECTION_ID append-note COLLECTION_ID ITEM_ID 'Authorized marker'
 ```
 
-The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.2.1 and its 31 tools; subsequent allowlist edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows do not expand allowlists automatically or change deletion confirmation requirements.
+The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.0 and its 41 tools; subsequent allowlist edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows do not expand allowlists automatically or change deletion confirmation requirements.
 
 See [performance measurements and tradeoffs](docs/performance.md). Concurrent cold queries share a scan; scans do not hold the write lock during network work. A scan overlapping a local write retries once rather than overwriting newer notes. Compact query notes are previews of at most 320 characters; full notes remain searchable and available through `readcube_get_paper`.
 
@@ -53,7 +70,7 @@ python3 -m venv .venv
 For tests, linting, and packaging, also install the `dev` extra:
 
 ```bash
-.venv/bin/python -m pip install -e '.[mcp,realtime,dev]'
+.venv/bin/python -m pip install -e '.[mcp,realtime,cloud,dev]'
 ```
 
 The development environment used macOS and Python 3.13. Python 3.11+ is declared supported, but a separate 3.11/3.12 test matrix has not been run. The MCP implementation uses the Python SDK **2.x** `MCPServer` API. The development dependency snapshot is in [requirements-lock.txt](requirements-lock.txt).
@@ -94,7 +111,7 @@ cp readcube.example.toml readcube.local.toml
 
 The default configuration leaves the write allowlist empty and enables dry-run. Edit `readcube.local.toml` only for Collections and PDF directories you explicitly authorize.
 
-For a client that accepts `mcpServers` JSON, adapt [examples/mcp-config.json](examples/mcp-config.json) to your absolute Python, project, and configuration paths. The service communicates over **local stdio**; it does not expose a public HTTP endpoint. Clients start the process on demand. Do not add informational output to protocol stdout.
+For a client that accepts `mcpServers` JSON, adapt [examples/mcp-config.json](examples/mcp-config.json) to your absolute Python, project, and configuration paths. The service communicates over **local stdio** by default. An optional single-owner OAuth-protected HTTP entry point is documented in [deploy/RENDER.md](deploy/RENDER.md). Clients start the process on demand. Do not add informational output to protocol stdout.
 
 Read [MCP installation and connection instructions](mcp/README.md) for portable bundles and launchers that do not depend on a client's `cwd` setting. This repository does not install itself into an agent's global configuration. Cloud use needs its own runtime setup, authentication, networking, and a verified MCP integration; copying a Mac-specific JSON configuration is insufficient.
 
@@ -106,8 +123,11 @@ Read [MCP installation and connection instructions](mcp/README.md) for portable 
 | Discovery and reading | `readcube_capabilities`, `readcube_list_collections`, `readcube_list_lists`, `readcube_list_smartlists`, `readcube_search_papers`, `readcube_get_paper` |
 | Metadata and annotations | `readcube_reader_metadata`, `readcube_get_revisions`, `readcube_get_annotations` |
 | References and PDFs | `readcube_add_paper`, `readcube_upload_pdf`, `readcube_import_pdf` |
+| PDF reading and search | `readcube_download_pdf`, `readcube_read_pdf`, `readcube_index_fulltext`, `readcube_search_fulltext`, `readcube_prepare_pdf_attachment` |
+| Authors and exports | `readcube_author_statistics`, `readcube_normalize_author_names`, `readcube_export_references` |
+| Batch metadata | `readcube_batch_update_metadata` |
 | Notes and tags | `readcube_update_notes`, `readcube_update_tags` |
-| Lists | `readcube_create_list`, `readcube_rename_list`, `readcube_manage_list_item`, `readcube_delete_list` |
+| Lists | `readcube_create_list`, `readcube_rename_list`, `readcube_move_list`, `readcube_manage_list_item`, `readcube_delete_list` |
 | Smart Lists | `readcube_create_smartlist`, `readcube_update_smartlist`, `readcube_delete_smartlist` |
 | Annotation writes | `readcube_create_annotation`, `readcube_update_annotation`, `readcube_delete_annotation` |
 | Reference deletion | `readcube_delete_paper` |
@@ -115,7 +135,7 @@ Read [MCP installation and connection instructions](mcp/README.md) for portable 
 
 Reads may execute directly once verified. Writes default to `dry_run=true`; execution requires `authorized=true`, `dry_run=false`, and a matching local Collection allowlist. Deletion additionally requires separate human confirmation and the exact text `DELETE <resource_id>`. Tool arguments do not replace human authorization.
 
-PDF tools require a nonempty `upload_roots` setting. Returned HTTPS upload destinations must match `upload_hosts`; ReadCube cookies are not sent to S3.
+PDF **upload/import** tools require a nonempty `upload_roots` setting. Original downloads and reading do not require upload permissions. Returned HTTPS upload destinations must match `upload_hosts`; ReadCube cookies are not sent to S3.
 
 ## Python SDK example
 
@@ -163,7 +183,7 @@ Only GET requests are retried. The client honors `Retry-After`; waits longer tha
 
 ## Validation and packaging
 
-Recorded validation for v0.2.1: **187 local tests passed, 2 opt-in integration tests skipped in the offline suite**. Authenticated read, count, cache, note append/idempotence/restoration, and the 31-tool configured stdio checks passed separately. Mock tests never promote real operations to VERIFIED. See [performance validation](docs/performance.md) for measurements and limits.
+Recorded validation for v0.3.0: **220 local tests passed, 2 opt-in integration tests skipped**. New download request verification remains pending because local network connections failed; the owner explicitly deferred online checks. The earlier authenticated library/note tests remain historical evidence, not validation of the new endpoint. Mock tests never promote real operations to VERIFIED. See [performance validation](docs/performance.md) for measurements and limits.
 
 ```bash
 .venv/bin/python -m pytest -q
@@ -173,7 +193,7 @@ Recorded validation for v0.2.1: **187 local tests passed, 2 opt-in integration t
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.2.1.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
+Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.0.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
 
 ## Documentation and limitations
 
@@ -182,4 +202,4 @@ Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION
 - [Endpoint table](docs/api-table.md) and [sanitized verification results](docs/verification-results.json).
 - [MCP deployment guide](mcp/README.md).
 
-Remaining limits include special authentication branches, shared/read-only role matrices, conditional writes, attachment types and subscription/size limits, and unusual annotation geometry. Synchronization uses complete scans with local diffs; notifications do not provide a durable server delta cursor. A missing item may reflect permission or indexing changes rather than deletion. The project does not provide automatic full-text downloading or bypass authentication, subscriptions, access controls, or rate limits.
+Remaining limits include special authentication branches, shared/read-only role matrices, conditional writes, attachment types and subscription/size limits, and unusual annotation geometry. Synchronization uses complete scans with local diffs; notifications do not provide a durable server delta cursor. A missing item may reflect permission or indexing changes rather than deletion. The project downloads authorized existing attachments; it does not automatically fetch unattached publisher full text or bypass authentication, subscriptions, access controls, or rate limits.

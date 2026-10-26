@@ -38,3 +38,9 @@
 | `import_pdf_flow` | FLOW | `sync` | `/collections/{collection_id}/items/upload_file` | VERIFIED / SOURCE_CONFIRMED |
 | `reader_metadata` | GET | `services` | `/reader/metadata` | VERIFIED / SOURCE_CONFIRMED |
 | `watch_changes` | FLOW | `push` | `/bayeux` | VERIFIED / SOURCE_CONFIRMED |
+
+## v0.3.0 addition
+
+| Operation | Method | Path | Evidence | Live status |
+|---|---|---|---|---|
+| `files_with_urls` | GET | `/collections/{collection_id}/items/files_with_urls` | Frontend `getFilesWithURLs`, repeated `item_ids[]` | UNVERIFIED; live check deferred by owner |

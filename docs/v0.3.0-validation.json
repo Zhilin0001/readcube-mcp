@@ -1,0 +1,12 @@
+{
+  "version": "0.3.0",
+  "mcp_tools": 41,
+  "offline_tests_passed": 220,
+  "opt_in_integration_tests_skipped": 2,
+  "stdio_offline_smoke": "PASSED",
+  "native_upload_widget_tests": "mock_host_success_failure_fallback_passed",
+  "new_pdf_endpoint_live_verification": "DEFERRED_BY_OWNER",
+  "new_pdf_endpoint_production_gate": "UNVERIFIED_until_live_semantic_check",
+  "native_chatgpt_end_to_end_test": "DEFERRED_BY_OWNER",
+  "remote_library_mutations_in_this_validation": false
+}

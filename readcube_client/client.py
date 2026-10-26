@@ -89,6 +89,38 @@ class ReadCubeClient(AbstractContextManager):
     def capabilities(self) -> dict:
         return self.registry.capabilities()
 
+    def files_with_urls(self, collection_id: str, item_ids: list[str]) -> dict:
+        from .pdf import files_with_urls
+        return files_with_urls(self, collection_id, item_ids)
+
+    def download_pdf(self, collection_id: str, item_id: str, *, sha256=None) -> dict:
+        from .pdf import download_pdf
+        return download_pdf(self, collection_id, item_id, sha256=sha256)
+
+    def read_pdf(self, collection_id: str, item_id: str, **kwargs) -> dict:
+        from .pdf import read_pdf
+        return read_pdf(self, collection_id, item_id, **kwargs)
+
+    def index_fulltext(self, collection_id: str, **kwargs) -> dict:
+        from .pdf import index_fulltext
+        return index_fulltext(self, collection_id, **kwargs)
+
+    def search_fulltext(self, collection_id: str, query: str, **kwargs) -> dict:
+        from .pdf import search_fulltext
+        return search_fulltext(self, collection_id, query, **kwargs)
+
+    def author_statistics(self, collection_id: str, **kwargs) -> dict:
+        from .bibliography import author_statistics
+        return author_statistics(self, collection_id, **kwargs)
+
+    def export_references(self, collection_id: str, **kwargs) -> dict:
+        from .bibliography import export_references
+        return export_references(self, collection_id, **kwargs)
+
+    def batch_update_metadata(self, collection_id: str, updates: list[dict], **kwargs) -> dict:
+        from .metadata import batch_update_metadata
+        return batch_update_metadata(self, collection_id, updates, **kwargs)
+
     def login(self):
         raise UnverifiedEndpointError(
             "Current password form is SOURCE_CONFIRMED; revised complete login flow is UNVERIFIED. "
@@ -664,6 +696,45 @@ class ReadCubeClient(AbstractContextManager):
             {"list": {"id": list_id, "collection_id": collection_id, "name": name.strip()}},
             **kwargs,
         )
+
+    def move_list(self, collection_id: str, list_id: str, parent_id: str | None, **kwargs):
+        """Move an existing List within its library, preserving name and membership."""
+        identifier(list_id)
+        if parent_id is not None:
+            identifier(parent_id)
+        if parent_id == list_id:
+            raise ValueError("A List cannot be its own parent")
+        ids = {"collection_id": collection_id, "list_id": list_id}
+        body = {"list": {"id": list_id, "collection_id": collection_id, "parent_id": parent_id}}
+        if kwargs.get("dry_run", self.settings.dry_run):
+            return self._write("move_list", ids, body, **kwargs)
+        self._check_authorization(collection_id, kwargs.get("authorization"), None)
+        self._require("move_list")
+        rows = {row["id"]: row for row in self.list_lists(collection_id) if not row.get("deleted")}
+        if list_id not in rows or (parent_id is not None and parent_id not in rows):
+            raise ValueError("List and parent must exist in the selected library")
+        visited = {list_id}
+        ancestor = parent_id
+        while ancestor:
+            if ancestor in visited:
+                raise ValueError("Moving the List would create a hierarchy cycle")
+            if ancestor not in rows:
+                raise ProtocolError("Incomplete parent hierarchy")
+            visited.add(ancestor)
+            ancestor = rows[ancestor].get("parent_id")
+        current = rows[list_id]
+        if (current.get("parent_id") or None) == parent_id:
+            return {"changed": False, "verified": True, "list": current}
+        self._write("move_list", ids, body, **kwargs)
+        saved = next((row for row in self.list_lists(collection_id) if row["id"] == list_id), None)
+        if (
+            saved is None
+            or saved.get("deleted")
+            or (saved.get("parent_id") or None) != parent_id
+            or saved.get("name") != current.get("name")
+        ):
+            raise ProtocolError("List move read-back did not match")
+        return {"changed": True, "verified": True, "list": saved}
 
     def add_to_list(self, collection_id: str, list_id: str, item_id: str, **kwargs):
         identifier(item_id)

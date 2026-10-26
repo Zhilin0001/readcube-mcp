@@ -49,6 +49,7 @@ Generated from `readcube_client/endpoints.json` and the local verification ledge
 | `delete_annotation` | DELETE | `sync` | `/collections/{collection_id}/items/{item_id}/annotations/{annotation_id}` | VERIFIED / SOURCE_CONFIRMED |
 | `create_list` | POST | `sync` | `/collections/{collection_id}/lists` | VERIFIED / SOURCE_CONFIRMED |
 | `rename_list` | PATCH | `sync` | `/collections/{collection_id}/lists/{list_id}` | VERIFIED / SOURCE_CONFIRMED |
+| `move_list` | PATCH | `sync` | `/collections/{collection_id}/lists/{list_id}` | VERIFIED / SOURCE_CONFIRMED |
 | `delete_list` | DELETE | `sync` | `/collections/{collection_id}/lists/{list_id}` | VERIFIED / SOURCE_CONFIRMED |
 | `add_to_list` | POST | `sync` | `/collections/{collection_id}/lists/{list_id}/add_items` | VERIFIED / SOURCE_CONFIRMED |
 | `remove_from_list` | POST | `sync` | `/collections/{collection_id}/lists/{list_id}/remove_items` | VERIFIED / SOURCE_CONFIRMED |
@@ -166,6 +167,8 @@ Ordinary List creation:
 {"list":{"id":"CLIENT_GENERATED_UUID","collection_id":"C","name":"Reading","parent_id":null}}
 ```
 
+Move an existing List with `PATCH /collections/C/lists/L` and `{"list":{"id":"L","collection_id":"C","parent_id":"P"}}`; use a null parent to return to the root. This partial patch preserves the List name and memberships. The frontend navigation `moveList` and Edit List form confirm the contract. A dedicated test-library move and return-to-root were read back on October 25, 2026. The client checks library membership and prevents hierarchy cycles before writing.
+
 Rename with `PATCH /collections/C/lists/L` and `{"list":{"id":"L","collection_id":"C","name":"Renamed"}}`. Add/remove membership through `POST .../lists/L/add_items` or `remove_items`, with `{"item_ids":["I"]}`. Responses contain `list`. Removing membership does not delete the reference.
 
 Membership indexing can lag behind writes. Verification uses bounded read-only polling, not repeated mutations. Root List CRUD and membership changes were live-tested; deep nesting and cross-library membership were not exhaustively tested.
@@ -254,3 +257,9 @@ These are client behaviors covered by protocol tests. The real service was not d
 The historical `sync/collections/` returned 301 to `https://services.readcube.com/collections`. This migration is recorded, not implemented as a redirect alias.
 
 `auth.session_status` checks local cookies only. `validate_saved_session` and `login_local.py --check` independently GET Collections and can safely persist cookies updated by the server. Cookie identity changes invalidate old session-bound evidence. No independent refresh-token route is invented; an expired session needs normal reauthentication. The revised complete password login and SSO/MFA/mandatory-CSRF branches were not all live-tested; `ReadCubeClient.login()` remains explicitly unavailable as an unverified general login API.
+
+## Original attachment URLs (v0.3.0)
+
+`GET /collections/{collection_id}/items/files_with_urls` uses repeated `item_ids[]` query parameters, as observed in the frontend `getFilesWithURLs` method. Expected JSON maps each requested item ID to attachment objects containing SHA-256 and a temporary `download_url`. The operation is SOURCE_CONFIRMED and remains UNVERIFIED until a real original download matches the reference hash; see `scripts/verify_pdf.py`. The original frontend download helper also builds `/collections/{collection_id}/items/{item_id}/download?hash=...&file_name=...`, but this release uses the file-URL lookup and never assumes that helper returns JSON.
+
+Storage transfers have separate HTTPS host validation, explicit redirect checks, no inherited cookies or HTTP authentication, bounded streaming, PDF-signature and SHA-256 validation. Generated host resources use separate expiring capability links. See [library workflows](library-tools.md) for the local text, FTS, author and metadata features.

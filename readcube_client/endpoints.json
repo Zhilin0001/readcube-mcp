@@ -601,5 +601,38 @@
       "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
       "character_offset": 2340179
     }
+  },
+  "move_list": {
+    "method": "PATCH",
+    "host": "sync",
+    "path": "/collections/{collection_id}/lists/{list_id}",
+    "body_contract": "{list:{id,collection_id,parent_id:null|string}}",
+    "response_key": "list",
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-25",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-JCLW3CJS.js",
+      "character_offset": 1114234,
+      "needle": "moveList(e,n){return this.dataList.update({id:e.id,collection_id:e.collection_id,parent_id:n})}"
+    }
+  },
+  "files_with_urls": {
+    "method": "GET",
+    "host": "sync",
+    "path": "/collections/{collection_id}/items/files_with_urls",
+    "body_contract": null,
+    "response_key": null,
+    "evidence": "SOURCE_CONFIRMED",
+    "verification": "UNVERIFIED",
+    "discovered": "2026-10-26",
+    "frontend_version": "5.4.24",
+    "source": {
+      "url": "https://app.readcube.com/chunk-QD3Q3KF7.js",
+      "character_offset": 2445525,
+      "needle": "getFilesWithURLs(e,r){"
+    },
+    "query_contract": "item_ids[]:string[]; returns {item_id:[{sha256,download_url,...}]}"
   }
 }

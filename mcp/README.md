@@ -1,6 +1,6 @@
-# ReadCube MCP 0.2.1
+# ReadCube MCP 0.3.0
 
-A Python 3.11+ local stdio MCP server with **31 tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
+A Python 3.11+ local stdio MCP server with **41 tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
 ## Install from the repository
 
@@ -24,7 +24,7 @@ From the repository root, with the `dev` dependencies installed:
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Extract `dist/readcube-mcp-0.2.1.zip`, enter the extracted directory, and run:
+Extract `dist/readcube-mcp-0.3.0.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh
@@ -47,7 +47,7 @@ Do not distribute either file. A new installation or changed session is not unlo
 
 ## Tool access
 
-The generated `tools.json` contains all 31 tool definitions and JSON schemas. Tools cover library reading and search, identifiers, PDFs, notes/tags, Lists/Smart Lists, annotations, metadata/revisions, and notification-assisted full scans. Fast workflows provide a one-request live count, compact cached queries, permission preflight, and append-with-read-back. The runtime reuses connections while rechecking local authorization and session state before each invocation. The SDK's 38 cataloged operations are not 38 separate MCP tools.
+The generated `tools.json` contains all 32 tool definitions and JSON schemas. Tools cover library reading and search, identifiers, PDFs, notes/tags, Lists/Smart Lists, annotations, metadata/revisions, and notification-assisted full scans. Fast workflows provide a one-request live count, compact cached queries, permission preflight, and append-with-read-back. The runtime reuses connections while rechecking local authorization and session state before each invocation. The SDK's 39 cataloged operations are not 39 separate MCP tools.
 
 Writes default to dry-run. Execution requires human authorization and a matching `write_collections` allowlist. Deletion additionally requires the exact confirmation `DELETE <resource_id>`. PDF tools require an authorized local `upload_roots` directory and an upload-host allowlist. Generating or installing MCP configuration does not expand these permissions.
 
@@ -64,3 +64,7 @@ With a valid local session and verified `list_collections` operation, run from t
 This starts a real subprocess, initializes the protocol, lists tools, reads capabilities and Collections, and checks a zero-write dry-run. Errors produce a nonzero exit status.
 
 This package exposes **local stdio**, not a public HTTP URL. A client that accepts only remote HTTP MCP endpoints requires a separate deployment or supported bridge. GitHub hosting alone does not provide a running MCP service or transfer authentication to a cloud environment.
+
+## PDF, author and batch workflows
+
+Version 0.3.0 adds original downloads, paginated text reading, cached author search/statistics, DOI-aware CSV/RIS/BibTeX export, batch metadata updates, full-text indexing/search and expiring file resources. See [the workflow guide](../docs/library-tools.md). The new PDF URL endpoint remains unverified until the read-only live check succeeds for your session. Compatible ChatGPT hosts can show a user-clicked native upload widget; unsupported clients keep the download link. Only the host can confirm the uploaded file ID. This client integration still needs online testing.

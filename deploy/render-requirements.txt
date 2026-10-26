@@ -1,0 +1,3 @@
+.[cloud,realtime]
+uvicorn>=0.34,<1
+PyJWT[crypto]>=2.10,<3

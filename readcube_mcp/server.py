@@ -69,12 +69,56 @@ def create_server(
     client_factory: Callable[[], ReadCubeClient] | None = None,
     *,
     artifact_origin: str | None = None,
+    local_login_enabled: bool = False,
+    local_login_config: str | None = None,
 ) -> MCPServer:
     factory = client_factory or ReadCubeClient
-    server = MCPServer("ReadCube Papers", version="0.3.2", instructions=INSTRUCTIONS)
+    server = MCPServer("ReadCube Papers", version="0.3.3", instructions=INSTRUCTIONS)
     read = ToolAnnotations(read_only_hint=True, destructive_hint=False, idempotent_hint=True)
     write = ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False)
     delete = ToolAnnotations(read_only_hint=False, destructive_hint=True, idempotent_hint=False)
+
+    if local_login_enabled:
+
+        @server.tool(annotations=write, structured_output=True)
+        def readcube_open_login(mode: Literal["terminal", "dialog"] = "terminal") -> dict[str, Any]:
+            """Open local macOS Terminal or login dialogs; never send credentials to MCP or chat.
+
+            The window reports its own result. Opening it does not confirm login success.
+            This tool is available only on a local stdio server running on macOS.
+            """
+            import subprocess
+            import sys
+
+            if sys.platform != "darwin":
+                raise ToolError("The local login dialog currently requires macOS")
+            module = (
+                "readcube_mcp.terminal_login" if mode == "terminal" else "readcube_mcp.login_gui"
+            )
+            command = [sys.executable, "-m", module]
+            if local_login_config:
+                command += ["--config", str(Path(local_login_config).expanduser().resolve())]
+            try:
+                if mode == "terminal":
+                    from readcube_mcp.terminal_login import open_terminal
+
+                    open_terminal(command)
+                else:
+                    subprocess.Popen(
+                        command,
+                        stdin=subprocess.DEVNULL,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        close_fds=True,
+                        start_new_session=True,
+                    )
+            except OSError:
+                raise ToolError("Could not start the local login window") from None
+            return {
+                "status": "started",
+                "authenticated": False,
+                "message": "Complete login in the opened window. This does not confirm login.",
+            }
 
     def call(method, *args, **kwargs):
         try:
@@ -752,7 +796,9 @@ def main():
 
     # Reuse connections while reloading permissions/session evidence on each lease.
     with ReadCubeClientPool(args.config) as pool:
-        create_server(pool).run(transport="stdio")
+        create_server(pool, local_login_enabled=True, local_login_config=args.config).run(
+            transport="stdio"
+        )
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-# ReadCube MCP 0.3.2
+# ReadCube MCP 0.3.3
 
-A Python 3.11+ local stdio MCP server with **41 tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
+A Python 3.11+ local stdio MCP server with **42 local tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
 ## Install from the repository
 
@@ -24,7 +24,7 @@ From the repository root, with the `dev` dependencies installed:
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Extract `dist/readcube-mcp-0.3.2.zip`, enter the extracted directory, and run:
+Extract `dist/readcube-mcp-0.3.3.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh
@@ -37,6 +37,9 @@ For a client that accepts `mcpServers` JSON, merge the generated `mcpServers.rea
 The build also creates a separate `start.local.sh` and `mcp.local.json` for the original source workspace. These reuse that workspace's Python environment, configuration, session, and verification ledger. They are excluded from the ZIP. Moving the workspace requires regenerating this machine-specific configuration.
 
 ## Authentication and verification
+
+On macOS, invoke `readcube_open_login` from Codex to open Terminal for local email and hidden-password entry. Use `mode="dialog"` for native dialogs instead. The response only confirms launch; the opened window reports the result. Credentials do not enter MCP tool inputs or chat. Reauthentication can invalidate session-scoped verification. This local-only tool is unavailable on the cloud server and does not implement SSO/MFA.
+
 
 Default local files:
 

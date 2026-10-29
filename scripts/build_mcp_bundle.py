@@ -60,7 +60,7 @@ async def main():
         shutil.copyfile(source, target)
         target.chmod(0o755 if target.suffix == ".sh" else 0o644)
         portable.append(name)
-    tools = await create_server().list_tools()
+    tools = await create_server(local_login_enabled=True).list_tools()
     manifest = {
         "name": "ReadCube Papers",
         "version": version,

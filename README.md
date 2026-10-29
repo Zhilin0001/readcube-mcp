@@ -2,9 +2,13 @@
 
 An unofficial Python 3.11+ SDK and local stdio MCP server for managing your own ReadCube Papers library.
 
-**v0.3.2 · 41 MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
+**v0.3.3 · 42 local MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
 
 Verification was performed on October 24–25, 2026, using an explicitly authorized private test Collection. The published results cover the documented requests and test cases, not every account role, parameter, or authentication flow. This project is not affiliated with ReadCube.
+
+## Local macOS login in v0.3.3
+
+Say “Open the ReadCube login window” to call `readcube_open_login` from the local stdio server. By default, macOS Terminal opens the login helper; `mode="dialog"` instead opens email and masked-password dialogs. Credentials go directly to the local helper, not tool arguments or chat. The MCP response confirms only that the helper was started; the window reports whether sign-in and a read-only connection check succeeded. Failed or cancelled login leaves the old session in place. The saved session is scoped to this Mac, and a changed session requires its own endpoint verification. SSO/MFA is not implemented. The remote HTTP service does not expose this local-only tool.
 
 ## Pagination recovery in v0.3.2
 
@@ -37,7 +41,7 @@ See [examples, verification command, performance boundaries and file-delivery li
 - Detect changes through complete scans, optionally triggered by Bayeux notifications.
 - Return structured JSON to agents, with dry-run plans, write allowlists, and separate deletion confirmation.
 
-The SDK catalog contains 40 operations/workflows; the MCP server groups its supported functionality into 41 tools, including local cached workflows. SDK-only methods, such as primary-file selection, are not automatically exposed as MCP tools.
+The SDK catalog contains 40 operations/workflows; the MCP server groups its supported functionality into 42 local tools, including local cached workflows and the macOS login launcher. SDK-only methods, such as primary-file selection, are not automatically exposed as MCP tools.
 
 ## List organization in v0.2.2
 
@@ -60,7 +64,7 @@ readcube --config readcube.local.toml append-note COLLECTION_ID ITEM_ID 'Authori
 readcube --config readcube.local.toml --execute --authorize-collection COLLECTION_ID append-note COLLECTION_ID ITEM_ID 'Authorized marker'
 ```
 
-The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.2 and its 41 tools; subsequent allowlist edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows do not expand allowlists automatically or change deletion confirmation requirements.
+The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.3 and its 42 local tools; subsequent allowlist edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows do not expand allowlists automatically or change deletion confirmation requirements.
 
 See [performance measurements and tradeoffs](docs/performance.md). Concurrent cold queries share a scan; scans do not hold the write lock during network work. A scan overlapping a local write retries once rather than overwriting newer notes. Compact query notes are previews of at most 320 characters; full notes remain searchable and available through `readcube_get_paper`.
 
@@ -201,7 +205,7 @@ Recorded validation for v0.3.1: **224 local tests passed, 2 opt-in integration t
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.2.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
+Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.3.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
 
 ## Documentation and limitations
 

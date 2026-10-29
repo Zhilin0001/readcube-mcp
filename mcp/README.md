@@ -1,4 +1,4 @@
-# ReadCube MCP 0.3.1
+# ReadCube MCP 0.3.2
 
 A Python 3.11+ local stdio MCP server with **41 tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
@@ -24,7 +24,7 @@ From the repository root, with the `dev` dependencies installed:
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Extract `dist/readcube-mcp-0.3.1.zip`, enter the extracted directory, and run:
+Extract `dist/readcube-mcp-0.3.2.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh

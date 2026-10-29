@@ -71,7 +71,7 @@ def create_server(
     artifact_origin: str | None = None,
 ) -> MCPServer:
     factory = client_factory or ReadCubeClient
-    server = MCPServer("ReadCube Papers", version="0.3.1", instructions=INSTRUCTIONS)
+    server = MCPServer("ReadCube Papers", version="0.3.2", instructions=INSTRUCTIONS)
     read = ToolAnnotations(read_only_hint=True, destructive_hint=False, idempotent_hint=True)
     write = ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False)
     delete = ToolAnnotations(read_only_hint=False, destructive_hint=True, idempotent_hint=False)

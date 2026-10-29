@@ -1,6 +1,7 @@
 [readcube]
 timeout = 30
 retries = 2
+pagination_retries = 2
 min_interval = 0.25
 dry_run = true
 write_collections = []

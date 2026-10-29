@@ -91,34 +91,42 @@ class ReadCubeClient(AbstractContextManager):
 
     def files_with_urls(self, collection_id: str, item_ids: list[str]) -> dict:
         from .pdf import files_with_urls
+
         return files_with_urls(self, collection_id, item_ids)
 
     def download_pdf(self, collection_id: str, item_id: str, *, sha256=None) -> dict:
         from .pdf import download_pdf
+
         return download_pdf(self, collection_id, item_id, sha256=sha256)
 
     def read_pdf(self, collection_id: str, item_id: str, **kwargs) -> dict:
         from .pdf import read_pdf
+
         return read_pdf(self, collection_id, item_id, **kwargs)
 
     def index_fulltext(self, collection_id: str, **kwargs) -> dict:
         from .pdf import index_fulltext
+
         return index_fulltext(self, collection_id, **kwargs)
 
     def search_fulltext(self, collection_id: str, query: str, **kwargs) -> dict:
         from .pdf import search_fulltext
+
         return search_fulltext(self, collection_id, query, **kwargs)
 
     def author_statistics(self, collection_id: str, **kwargs) -> dict:
         from .bibliography import author_statistics
+
         return author_statistics(self, collection_id, **kwargs)
 
     def export_references(self, collection_id: str, **kwargs) -> dict:
         from .bibliography import export_references
+
         return export_references(self, collection_id, **kwargs)
 
     def batch_update_metadata(self, collection_id: str, updates: list[dict], **kwargs) -> dict:
         from .metadata import batch_update_metadata
+
         return batch_update_metadata(self, collection_id, updates, **kwargs)
 
     def login(self):
@@ -355,6 +363,34 @@ class ReadCubeClient(AbstractContextManager):
         )
 
     def iter_items(
+        self,
+        collection_id: str,
+        *,
+        list_id: str | None = None,
+        size: int = 50,
+        query: str | None = None,
+    ):
+        """Return only a complete scan, restarting from page one on inconsistent pages.
+
+        Buffer each attempt so rows from a failed attempt never escape to a caller.
+        Only idempotent reads are repeated; an incomplete scan never authorizes a write.
+        """
+        for attempt in range(self.settings.pagination_retries + 1):
+            try:
+                rows = list(
+                    self._iter_items_once(collection_id, list_id=list_id, size=size, query=query)
+                )
+                yield from rows
+                return
+            except PaginationError as error:
+                if attempt == self.settings.pagination_retries:
+                    raise PaginationError(
+                        f"{error}; complete scan failed after {attempt + 1} attempts; "
+                        "no partial results were used"
+                    ) from error
+                time.sleep(min(0.25 * 2**attempt, 2))
+
+    def _iter_items_once(
         self,
         collection_id: str,
         *,

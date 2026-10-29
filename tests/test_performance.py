@@ -50,9 +50,68 @@ def test_pagination_rejects_changed_total(make_client):
             {"items": [{"id": "b"}], "total": 2, "scroll_id": "c"},
         ]
     )
-    client = make_client(lambda r: httpx.Response(200, json=next(replies)), verified=["list_items"])
+    client = make_client(
+        lambda r: httpx.Response(200, json=next(replies)),
+        verified=["list_items"],
+        pagination_retries=0,
+    )
     with pytest.raises(PaginationError, match="changed"):
         client.list_items("lib")
+
+
+@pytest.mark.parametrize("failure", ["changed", "missing_cursor", "duplicate"])
+def test_pagination_restarts_and_discards_partial_attempt(make_client, monkeypatch, failure):
+    monkeypatch.setattr("readcube_client.client.time.sleep", lambda _: None)
+    calls = []
+    attempts = 0
+
+    def handle(request):
+        nonlocal attempts
+        calls.append(request)
+        if "scroll_id" not in request.url.params:
+            attempts += 1
+            if attempts == 1 and failure == "missing_cursor":
+                return httpx.Response(200, json={"items": [{"id": "stale"}], "total": 2})
+            first_id = "stale" if attempts == 1 else "fresh1"
+            return httpx.Response(
+                200, json={"items": [{"id": first_id}], "total": 2, "scroll_id": "cursor"}
+            )
+        if attempts == 1:
+            item_id = "stale" if failure == "duplicate" else "other"
+            total = 3 if failure == "changed" else 2
+        else:
+            item_id, total = "fresh2", 2
+        return httpx.Response(200, json={"items": [{"id": item_id}], "total": total})
+
+    client = make_client(handle, verified=["list_items"])
+    iterator = client.iter_items("lib")
+    assert next(iterator)["id"] == "fresh1"
+    assert [row["id"] for row in iterator] == ["fresh2"]
+    assert attempts == 2
+    assert sum("scroll_id" not in request.url.params for request in calls) == 2
+
+
+def test_import_refuses_write_after_persistent_incomplete_scans(make_client, monkeypatch):
+    monkeypatch.setattr("readcube_client.client.time.sleep", lambda _: None)
+    methods = []
+
+    def handle(request):
+        methods.append(request.method)
+        return httpx.Response(200, json={"items": [{"id": "partial"}], "total": 2})
+
+    client = make_client(
+        handle,
+        verified=["list_items", "import_identifier"],
+        write_collections=["lib"],
+    )
+    with pytest.raises(PaginationError, match="failed after 3 attempts"):
+        client.import_by_doi(
+            "lib",
+            "10.1234/test",
+            authorization=WriteAuthorization(collection_id="lib", authorized=True),
+            dry_run=False,
+        )
+    assert methods == ["GET", "GET", "GET"]
 
 
 def test_legacy_search_shares_index_but_import_search_stays_live(make_client):

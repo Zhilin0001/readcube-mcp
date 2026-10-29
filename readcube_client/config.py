@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     client_version: str = "5.4.24"
     timeout: float = Field(default=30, gt=0, le=300)
     retries: int = Field(default=2, ge=0, le=5)
+    pagination_retries: int = Field(default=2, ge=0, le=5)
     min_interval: float = Field(default=0.25, ge=0)
     max_pages: int = Field(default=10000, ge=1)
     dry_run: bool = True
@@ -24,9 +25,13 @@ class Settings(BaseSettings):
     upload_hosts: list[str] = Field(default_factory=lambda: ["sync.readcube.com"])
     upload_roots: list[Path] = Field(default_factory=list)
     upload_timeout: float = Field(default=120, gt=0, le=600)
-    download_hosts: list[str] = Field(default_factory=lambda: [
-        "sync.readcube.com", "*.amazonaws.com", "*.cloudfront.net",
-    ])
+    download_hosts: list[str] = Field(
+        default_factory=lambda: [
+            "sync.readcube.com",
+            "*.amazonaws.com",
+            "*.cloudfront.net",
+        ]
+    )
     max_pdf_bytes: int = Field(default=100 * 1024 * 1024, ge=1024, le=500 * 1024 * 1024)
     artifact_base_url: str | None = None
 

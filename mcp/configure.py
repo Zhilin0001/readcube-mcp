@@ -1,4 +1,4 @@
-"""Generate local stdio configuration without copying credentials or enabling writes."""
+"""Generate local stdio configuration without copying credentials."""
 
 import json
 import os

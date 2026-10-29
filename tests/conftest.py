@@ -10,6 +10,7 @@ def make_client(tmp_path):
     clients = []
 
     def make(handler, verified=(), **overrides):
+        overrides.setdefault("write_policy", "allowlist")
         settings = Settings(
             _env_file=None,
             verification_file=tmp_path / "verified.json",

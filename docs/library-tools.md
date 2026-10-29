@@ -1,6 +1,6 @@
 # Library tools in v0.3.1
 
-The server exposes 41 tools. All existing write authorization and endpoint verification gates remain enabled. This release adds the implementation of the workflows below. The new `files_with_urls` request is **SOURCE_CONFIRMED, UNVERIFIED** until the operator runs the read-only live check in their own session. Its production download path cannot transmit that request before verification. Local live verification succeeded on October 26: original bytes and hashes, real PDF reading/search, authors, exports and test-library metadata updates passed. Verification remains session-bound. See [live results](v0.3.1-live-validation.md).
+The server exposes 43 local tools. All existing write authorization and endpoint verification gates remain enabled. This release adds the implementation of the workflows below. The new `files_with_urls` request is **SOURCE_CONFIRMED, UNVERIFIED** until the operator runs the read-only live check in their own session. Its production download path cannot transmit that request before verification. Local live verification succeeded on October 26: original bytes and hashes, real PDF reading/search, authors, exports and test-library metadata updates passed. Verification remains session-bound. See [live results](v0.3.1-live-validation.md).
 
 ## Original PDFs and reading
 
@@ -57,7 +57,7 @@ CSV uses UTF-8 with BOM and protects cells from spreadsheet formula execution. R
 {"collection_id":"LIBRARY_ID","updates":[{"item_id":"ITEM_ID","patch":{"article":{"title":"Corrected title","year":2025},"ext_ids":{"doi":"10.1000/example"}}}],"dry_run":true}
 ```
 
-Call `readcube_batch_update_metadata` with that preview first. Execution requires the human's concrete authorization, `authorized=true`, `dry_run=false`, an allowlisted library and permission to manage references. Up to 100 explicit, unique IDs are accepted. Only documented article fields and external identifiers are patchable; IDs, library membership, attachments and notes cannot be replaced through this tool.
+Call `readcube_batch_update_metadata` with that preview first. Execution requires the human's concrete authorization, `authorized=true`, `dry_run=false`, a library permitted by local policy and permission to manage references. Up to 100 explicit, unique IDs are accepted. Only documented article fields and external identifiers are patchable; IDs, library membership, attachments and notes cannot be replaced through this tool.
 
 All patches and targets are checked before writing. The tool merges requested fields with fresh records, saves private originals to a journal, and independently reads back each result. Remote requests remain per-item because no bulk metadata mutation contract is established. Failures are not transactional rollback: a partial batch reports verified, needs-reconciliation and unattempted records. It stops on the first failure by default and never automatically retries an uncertain write. Reconcile the current server state before retrying. Readback ignores only the upstream-managed `user_data.modified` audit timestamp; notes, tags, attachments and memberships must remain unchanged. A separate batch lock keeps long preflight work from blocking cached queries; individual writes retain their short cache lock and invalidation. Concurrent edits by other applications remain a limitation of the upstream API.
 

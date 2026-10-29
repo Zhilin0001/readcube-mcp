@@ -1,6 +1,6 @@
-# ReadCube MCP 0.3.3
+# ReadCube MCP 0.3.4
 
-A Python 3.11+ local stdio MCP server with **42 local tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
+A Python 3.11+ local stdio MCP server with **43 local tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
 ## Install from the repository
 
@@ -13,7 +13,7 @@ cp readcube.example.toml readcube.local.toml
 .venv/bin/python -m readcube_mcp --config readcube.local.toml
 ```
 
-Authenticate and verify the required operations before using production tools; see the [main README](https://github.com/Zhilin0001/readcube-mcp#authentication-and-verification). The initial configuration has no authorized write Collections. The source checkout and the portable bundle use different launch layouts; `install.sh` below is intended for an extracted bundle containing its wheel.
+Authenticate and verify the required operations before using production tools; see the [main README](https://github.com/Zhilin0001/readcube-mcp#authentication-and-verification). The initial configuration permits all libraries, while each write still requires explicit authorization. The source checkout and the portable bundle use different launch layouts; `install.sh` below is intended for an extracted bundle containing its wheel.
 
 ## Build and install a portable bundle
 
@@ -24,13 +24,13 @@ From the repository root, with the `dev` dependencies installed:
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Extract `dist/readcube-mcp-0.3.3.zip`, enter the extracted directory, and run:
+Extract `dist/readcube-mcp-0.3.4.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh
 ```
 
-The installer creates a private `.venv`, installs the bundled wheel with MCP and realtime dependencies, and generates `mcp.local.json`. Internet access is required to download dependencies. Existing `readcube.local.toml` is preserved; a newly generated file has an empty write allowlist. Installation does not log in or modify the remote library.
+The installer creates a private `.venv`, installs the bundled wheel with MCP and realtime dependencies, and generates `mcp.local.json`. Internet access is required to download dependencies. Existing `readcube.local.toml` is preserved; a newly generated file permits writes to all libraries subject to authorization. Installation does not log in or modify the remote library.
 
 For a client that accepts `mcpServers` JSON, merge the generated `mcpServers.readcube` entry into its existing configuration. The entry invokes `start.sh`, which resolves the bundle directory itself. The client starts the stdio process on demand; a manually started process waiting for input is normal. Keep protocol stdout free of extra output.
 
@@ -50,9 +50,9 @@ Do not distribute either file. A new installation or changed session is not unlo
 
 ## Tool access
 
-The generated `tools.json` contains all 32 tool definitions and JSON schemas. Tools cover library reading and search, identifiers, PDFs, notes/tags, Lists/Smart Lists, annotations, metadata/revisions, and notification-assisted full scans. Fast workflows provide a one-request live count, compact cached queries, permission preflight, and append-with-read-back. The runtime reuses connections while rechecking local authorization and session state before each invocation. The SDK's 39 cataloged operations are not 39 separate MCP tools.
+The generated `tools.json` contains all 43 local tool definitions and JSON schemas. Tools cover library reading and search, identifiers, PDFs, notes/tags, Lists/Smart Lists, annotations, metadata/revisions, and notification-assisted full scans. Fast workflows provide a one-request live count, compact cached queries, permission preflight, and append-with-read-back. The runtime reuses connections while rechecking local authorization and session state before each invocation. The SDK's 39 cataloged operations are not 39 separate MCP tools.
 
-Writes default to dry-run. Execution requires human authorization and a matching `write_collections` allowlist. Deletion additionally requires the exact confirmation `DELETE <resource_id>`. PDF tools require an authorized local `upload_roots` directory and an upload-host allowlist. Generating or installing MCP configuration does not expand these permissions.
+Writes default to dry-run. Execution requires human authorization and a permitted library under the local write policy. Deletion additionally requires the exact confirmation `DELETE <resource_id>`. PDF tools require an authorized local `upload_roots` directory and an upload-host allowlist. Set `write_policy = "allowlist"` to restrict to `write_collections`; per-library blocks take precedence. With the default `all` mode, existing `write_collections` values do not restrict writes.
 
 Annotation creation supports reviewed sticky-note and single-page-highlight shapes; MCP updates are limited to note/has_note/color_id. The watch window is capped at 30 seconds, but complete scans take additional time. Configure client timeouts accordingly. There is no durable server delta cursor.
 

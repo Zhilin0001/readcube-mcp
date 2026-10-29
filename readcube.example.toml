@@ -4,6 +4,7 @@ retries = 2
 pagination_retries = 2
 min_interval = 0.25
 dry_run = true
+write_policy = "all"
 write_collections = []
 upload_hosts = ["sync.readcube.com", "s3.amazonaws.com"]
 upload_roots = []

@@ -1,5 +1,6 @@
 import tomllib
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,6 +22,7 @@ class Settings(BaseSettings):
     min_interval: float = Field(default=0.25, ge=0)
     max_pages: int = Field(default=10000, ge=1)
     dry_run: bool = True
+    write_policy: Literal["all", "allowlist"] = "all"
     write_collections: list[str] = Field(default_factory=list)
     upload_hosts: list[str] = Field(default_factory=lambda: ["sync.readcube.com"])
     upload_roots: list[Path] = Field(default_factory=list)

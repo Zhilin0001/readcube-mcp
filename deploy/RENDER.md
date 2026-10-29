@@ -32,7 +32,7 @@ and the existing session's validity need read-only verification; a changed sessi
 verification. The existing interactive login helper and extended verification flows are not a fully
 tested unattended cloud onboarding mechanism. Update secret files when the session expires.
 
-Keep READCUBE_WRITE_COLLECTIONS empty until specific writes are authorized. PDF upload tools refer
+Writes default to all libraries subject to per-action authorization. To use an allowlist instead, set `READCUBE_WRITE_POLICY=allowlist` and configure `READCUBE_WRITE_COLLECTIONS`. Library restrictions are saved under `READCUBE_STATE_DIR`; an ephemeral `/tmp` loses them on restart, so use durable storage for persistent restrictions. Separate deployments maintain separate policy files. PDF upload tools refer
 to the server filesystem, not files attached in ChatGPT; they need a separate authorized upload flow.
 
 Free compute can sleep and has no durable writable disk; it is for connection testing. For always-on

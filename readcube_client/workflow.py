@@ -393,11 +393,13 @@ def query_library(
 
 def workflow_status(client, collection_id=None):
     """Inspect effective runtime permissions and verification without remote requests."""
+    from .write_policy import blocked_collections, write_allowed
+
     return {
         "collection_id": collection_id,
-        "write_allowed": collection_id in client.settings.write_collections
-        if collection_id
-        else None,
+        "write_allowed": write_allowed(client, collection_id) if collection_id else None,
+        "write_policy": client.settings.write_policy,
+        "blocked_collections": blocked_collections(client),
         "write_collections": list(client.settings.write_collections),
         "operations": {
             op: {"verified": client.registry.verified(op)}
@@ -410,6 +412,7 @@ def workflow_status(client, collection_id=None):
 def append_note(client, collection_id, item_id, text, *, authorized=False, dry_run=True):
     """Preserve existing notes; serialize local appends, append once, and verify saved text."""
     from .client import identifier
+    from .write_policy import write_allowed
 
     identifier(item_id)
     if not text.strip():
@@ -433,7 +436,7 @@ def append_note(client, collection_id, item_id, text, *, authorized=False, dry_r
             "item_id": item_id,
             "title": (item.get("article") or {}).get("title"),
             "dry_run": dry_run,
-            "write_allowed": collection_id in client.settings.write_collections,
+            "write_allowed": write_allowed(client, collection_id),
             "already_present": present,
             "verified": False,
         }

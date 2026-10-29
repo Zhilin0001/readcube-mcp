@@ -134,6 +134,7 @@ def verify(args):
         else:
             collection_id = matches[0]["id"]
         settings.write_collections = [collection_id]
+        settings.write_policy = "allowlist"
         authorization = WriteAuthorization(collection_id=collection_id, authorized=True)
         writes = {"authorization": authorization, "dry_run": False}
         private_json_write(

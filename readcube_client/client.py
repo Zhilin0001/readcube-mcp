@@ -587,6 +587,7 @@ class ReadCubeClient(AbstractContextManager):
         # Coordinate with scans/other local writers. A lost response may still
         # represent a committed write, so uncertain writes invalidate the index.
         with library_cache_lock(self, collection_id):
+            self._check_authorization(collection_id, authorization, delete_target)
             try:
                 result = self._request(name, ids=ids, body=body)
             except BaseException:
@@ -606,13 +607,16 @@ class ReadCubeClient(AbstractContextManager):
             return result
 
     def _check_authorization(self, collection_id, authorization, delete_target=None):
+        from .write_policy import write_allowed
+
         if (
             not authorization
             or not authorization.authorized
             or authorization.collection_id != collection_id
-            or collection_id not in self.settings.write_collections
         ):
-            raise AuthorizationError("Explicit authorization and allowlisted collection required")
+            raise AuthorizationError("Explicit authorization for this collection is required")
+        if not write_allowed(self, collection_id):
+            raise AuthorizationError("Writing to this collection is disabled by local policy")
         if delete_target and authorization.confirmation != f"DELETE {delete_target}":
             raise AuthorizationError(
                 f"Separate deletion confirmation required: DELETE {delete_target}"

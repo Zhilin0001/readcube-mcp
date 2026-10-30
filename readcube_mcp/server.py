@@ -39,6 +39,8 @@ PDF and text caches are keyed by exact SHA-256 and isolated per login. Scans can
 Use field=author for cached author searches. Author statistics deduplicate exact DOI values only,
 without deleting records or asserting identity of similarly named people. Exports support CSV,
 RIS and BibTeX. Batch metadata updates require explicit authorization and default to a dry-run.
+For multiple DOI imports use readcube_batch_import_dois: one fresh library scan per batch, with
+per-item readback and durable reconciliation. Do not blindly retry a needs_reconciliation result.
 prepare_pdf_attachment returns an expiring file resource/download link; a returned resource is not
 proof that the ChatGPT host uploaded the file into its own conversation storage.
 """
@@ -75,7 +77,7 @@ def create_server(
     local_login_config: str | None = None,
 ) -> MCPServer:
     factory = client_factory or ReadCubeClient
-    server = MCPServer("ReadCube Papers", version="0.3.4", instructions=INSTRUCTIONS)
+    server = MCPServer("ReadCube Papers", version="0.3.5", instructions=INSTRUCTIONS)
     read = ToolAnnotations(read_only_hint=True, destructive_hint=False, idempotent_hint=True)
     write = ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False)
     delete = ToolAnnotations(read_only_hint=False, destructive_hint=True, idempotent_hint=False)
@@ -520,6 +522,30 @@ def create_server(
             collection_id,
             doi or pmid,
             **permissions(collection_id, authorized, dry_run),
+        )
+
+    @server.tool(annotations=write, structured_output=True)
+    def readcube_batch_import_dois(
+        collection_id: str,
+        dois: Annotated[list[str], Field(min_length=1, max_length=200)],
+        list_id: str | None = None,
+        authorized: bool = False,
+        dry_run: bool = True,
+    ) -> dict[str, Any]:
+        """Import up to 200 DOI records with one fresh scan, readback, and optional List filing.
+
+        Preview first. Each record and List membership is verified; unresolved writes halt and
+        require reconciliation. This tool does not accept PMID or guarantee cross-client uniqueness.
+        """
+        from readcube_client.batch_import import batch_import_dois
+
+        return workflow_call(
+            batch_import_dois,
+            collection_id,
+            dois,
+            list_id=list_id,
+            authorized=authorized,
+            dry_run=dry_run,
         )
 
     @server.tool(annotations=write, structured_output=True)

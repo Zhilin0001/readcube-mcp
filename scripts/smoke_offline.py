@@ -18,7 +18,7 @@ async def main():
     async with stdio_client(params) as (r, w), ClientSession(r, w) as session:
         initialized = await session.initialize()
         tools = await session.list_tools()
-        assert len(tools.tools) == 43
+        assert len(tools.tools) == 44
         assert any(tool.name == "readcube_open_login" for tool in tools.tools)
         result = await session.call_tool(
             "readcube_normalize_author_names", {"names": ["Doe, Jane"]}

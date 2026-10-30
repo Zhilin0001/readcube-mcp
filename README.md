@@ -2,9 +2,15 @@
 
 An unofficial Python 3.11+ SDK and local stdio MCP server for managing your own ReadCube Papers library.
 
-**v0.3.4 · 43 local MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
+**v0.3.5 · 44 local MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
 
 Verification was performed on October 24–25, 2026, using an explicitly authorized private test Collection. The published results cover the documented requests and test cases, not every account role, parameter, or authentication flow. This project is not affiliated with ReadCube.
+
+## Batch DOI import in v0.3.5
+
+`readcube_batch_import_dois` imports up to 200 DOI values after one complete fresh collection scan, rather than one full scan per DOI. Pagination failures can trigger a bounded restart of that scan. A dry run previews existing and new records. Execution requires explicit authorization and verifies each item by independent readback. Optionally supply `list_id`: membership writes remain individually verified API calls and a fresh List scan confirms them. Duplicate input DOIs collapse; multiple existing matches require review. A private, collection-scoped journal records uncertain writes before transmission; later calls never blindly repeat an unresolved import or membership write. Reconcile uncertain results before resuming.
+
+Batch calls serialize with other batch calls on this state directory and stop if another local write changes the cached generation. Independent applications, other machines or session-specific writers can still modify the library concurrently; ReadCube has no verified transaction or DOI uniqueness guarantee. Do not run competing imports concurrently. The journal must be kept on durable storage: a cloud deployment using ephemeral `/tmp` loses its reconciliation history on restart. Large batches can take longer than the host tool timeout; use smaller authorized batches when needed. PMID imports remain subject to their own verification gate and are not accepted by this DOI-only tool.
 
 ## Library write access in v0.3.4
 
@@ -47,7 +53,7 @@ See [examples, verification command, performance boundaries and file-delivery li
 - Detect changes through complete scans, optionally triggered by Bayeux notifications.
 - Return structured JSON to agents, with dry-run plans, configurable per-library write access, and separate deletion confirmation.
 
-The SDK catalog contains 40 operations/workflows; the MCP server groups its supported functionality into 43 local tools, including local cached workflows and the macOS login launcher. SDK-only methods, such as primary-file selection, are not automatically exposed as MCP tools.
+The SDK catalog contains 40 operations/workflows; the MCP server groups its supported functionality into 44 local tools, including local cached workflows and the macOS login launcher. SDK-only methods, such as primary-file selection, are not automatically exposed as MCP tools.
 
 ## List organization in v0.2.2
 
@@ -70,7 +76,7 @@ readcube --config readcube.local.toml append-note COLLECTION_ID ITEM_ID 'Authori
 readcube --config readcube.local.toml --execute --authorize-collection COLLECTION_ID append-note COLLECTION_ID ITEM_ID 'Authorized marker'
 ```
 
-The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.4 and its 43 local tools; subsequent write policy edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows preserve deletion confirmation requirements.
+The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.5 and its 44 local tools; subsequent write policy edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows preserve deletion confirmation requirements.
 
 See [performance measurements and tradeoffs](docs/performance.md). Concurrent cold queries share a scan; scans do not hold the write lock during network work. A scan overlapping a local write retries once rather than overwriting newer notes. Compact query notes are previews of at most 320 characters; full notes remain searchable and available through `readcube_get_paper`.
 
@@ -138,7 +144,7 @@ Read [MCP installation and connection instructions](mcp/README.md) for portable 
 | Fast workflows | `readcube_count_papers`, `readcube_query_library`, `readcube_append_note`, `readcube_workflow_status`, `readcube_set_library_write_access` |
 | Discovery and reading | `readcube_capabilities`, `readcube_list_collections`, `readcube_list_lists`, `readcube_list_smartlists`, `readcube_search_papers`, `readcube_get_paper` |
 | Metadata and annotations | `readcube_reader_metadata`, `readcube_get_revisions`, `readcube_get_annotations` |
-| References and PDFs | `readcube_add_paper`, `readcube_upload_pdf`, `readcube_import_pdf` |
+| References and PDFs | `readcube_add_paper`, `readcube_batch_import_dois`, `readcube_upload_pdf`, `readcube_import_pdf` |
 | PDF reading and search | `readcube_download_pdf`, `readcube_read_pdf`, `readcube_index_fulltext`, `readcube_search_fulltext`, `readcube_prepare_pdf_attachment` |
 | Authors and exports | `readcube_author_statistics`, `readcube_normalize_author_names`, `readcube_export_references` |
 | Batch metadata | `readcube_batch_update_metadata` |
@@ -200,6 +206,8 @@ Only GET requests are retried. The client honors `Retry-After`; waits longer tha
 
 ## Validation and packaging
 
+v0.3.5: **247 local tests passed, 2 opt-in tests skipped**. A real tPBM dry-run preview used one requested full scan for two DOI inputs; real batch writes were not tested because the dedicated test library was unavailable in the current session. A mock 1,000-record, 10-DOI benchmark used 30 GETs (20 scan pages and 10 readbacks), versus 200 scan GETs for ten individual lookups; these are request counts, not live timing promises.
+
 v0.3.2: **228 local tests passed, 2 opt-in tests skipped**. Pagination recovery is covered for changed totals, missing cursors, duplicate page entries and repeated failures that must not issue an import write. Read-only scans of tPBM and My Papers passed on October 29; the originally reported transient error was not reproduced in those scans.
 
 Recorded validation for v0.3.1: **224 local tests passed, 2 opt-in integration tests skipped**, plus **25 live stdio checks** on October 26. Original PDF download/hash validation, text reading/search, authors, all three export formats, and two-record metadata update/restoration passed. Writes stayed in the dedicated test library. Native ChatGPT attachment upload was not tested in the October 26 validation. See [live results and timings](docs/v0.3.1-live-validation.md). Mock tests never promote real operations to VERIFIED. See [performance validation](docs/performance.md) for measurements and limits.
@@ -212,7 +220,7 @@ Recorded validation for v0.3.1: **224 local tests passed, 2 opt-in integration t
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.4.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
+Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.5.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
 
 ## Documentation and limitations
 

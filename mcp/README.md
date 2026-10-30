@@ -1,6 +1,6 @@
-# ReadCube MCP 0.3.4
+# ReadCube MCP 0.3.5
 
-A Python 3.11+ local stdio MCP server with **43 local tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
+A Python 3.11+ local stdio MCP server with **44 local tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
 ## Install from the repository
 
@@ -24,7 +24,7 @@ From the repository root, with the `dev` dependencies installed:
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Extract `dist/readcube-mcp-0.3.4.zip`, enter the extracted directory, and run:
+Extract `dist/readcube-mcp-0.3.5.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh
@@ -50,7 +50,7 @@ Do not distribute either file. A new installation or changed session is not unlo
 
 ## Tool access
 
-The generated `tools.json` contains all 43 local tool definitions and JSON schemas. Tools cover library reading and search, identifiers, PDFs, notes/tags, Lists/Smart Lists, annotations, metadata/revisions, and notification-assisted full scans. Fast workflows provide a one-request live count, compact cached queries, permission preflight, and append-with-read-back. The runtime reuses connections while rechecking local authorization and session state before each invocation. The SDK's 39 cataloged operations are not 39 separate MCP tools.
+The generated `tools.json` contains all 44 local tool definitions and JSON schemas. Tools cover library reading and search, identifiers, PDFs, notes/tags, Lists/Smart Lists, annotations, metadata/revisions, and notification-assisted full scans. Fast workflows provide a one-request live count, compact cached queries, permission preflight, and append-with-read-back. The runtime reuses connections while rechecking local authorization and session state before each invocation. The SDK's 39 cataloged operations are not 39 separate MCP tools.
 
 Writes default to dry-run. Execution requires human authorization and a permitted library under the local write policy. Deletion additionally requires the exact confirmation `DELETE <resource_id>`. PDF tools require an authorized local `upload_roots` directory and an upload-host allowlist. Set `write_policy = "allowlist"` to restrict to `write_collections`; per-library blocks take precedence. With the default `all` mode, existing `write_collections` values do not restrict writes.
 

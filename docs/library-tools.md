@@ -1,6 +1,6 @@
 # Library tools in v0.3.1
 
-The server exposes 43 local tools. All existing write authorization and endpoint verification gates remain enabled. This release adds the implementation of the workflows below. The new `files_with_urls` request is **SOURCE_CONFIRMED, UNVERIFIED** until the operator runs the read-only live check in their own session. Its production download path cannot transmit that request before verification. Local live verification succeeded on October 26: original bytes and hashes, real PDF reading/search, authors, exports and test-library metadata updates passed. Verification remains session-bound. See [live results](v0.3.1-live-validation.md).
+The server exposes 44 local tools. All existing write authorization and endpoint verification gates remain enabled. This release adds the implementation of the workflows below. The new `files_with_urls` request is **SOURCE_CONFIRMED, UNVERIFIED** until the operator runs the read-only live check in their own session. Its production download path cannot transmit that request before verification. Local live verification succeeded on October 26: original bytes and hashes, real PDF reading/search, authors, exports and test-library metadata updates passed. Verification remains session-bound. See [live results](v0.3.1-live-validation.md).
 
 ## Original PDFs and reading
 

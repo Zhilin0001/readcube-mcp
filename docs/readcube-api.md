@@ -10,7 +10,7 @@ Discovery and verification dates: **October 24–25, 2026**. Reviewed public fro
 - `UNKNOWN`: no complete reviewed contract.
 - `UNVERIFIED`: runtime verification state, which can coexist with source confirmation.
 
-Evidence and availability are separate. Production calls require an active-session ledger entry matching the endpoint contract's SHA-256. The public [verification snapshot](verification-results.json) is sanitized research evidence, not an unlock file.
+Evidence and availability are separate. Most production calls require an active-session ledger entry matching the endpoint contract's SHA-256. PDF upload and import can instead use the pinned project-tested contracts, restricted to those workflows and client version 5.4.24. The public [verification snapshot](verification-results.json) records the historical tests; it does not establish that a new account or session was individually tested.
 
 ## Hosts and common parameters
 
@@ -227,7 +227,7 @@ Modification uses `PATCH .../items/I/annotations/A`; `note` and `color_id` were 
 
 Single-reference deletion uses `DELETE /collections/C/items/I`; a List uses `DELETE /collections/C/lists/L`. Tests deleted one individually approved synthetic reference and ordinary List, then an individually approved synthetic note and Smart List. GET tombstones, 404s, or list absence confirmed the results. No bulk deletion was performed.
 
-Execution requires the operation to be VERIFIED for the current session, the Collection to be allowed by local policy (`write_policy=all` by default, or `allowlist` with `write_collections`), and a matching `WriteAuthorization(authorized=True)`. Deletion additionally requires `confirmation="DELETE <exact_resource_id>"`. MCP agents must obtain the human's separate deletion authorization; setting tool parameters is not sufficient.
+Execution requires session verification, or the pinned project verification within a PDF upload/import workflow; the Collection to be allowed by local policy (`write_policy=all` by default, or `allowlist` with `write_collections`), and a matching `WriteAuthorization(authorized=True)`. Deletion additionally requires `confirmation="DELETE <exact_resource_id>"`. MCP agents must obtain the human's separate deletion authorization; setting tool parameters is not sufficient.
 
 ## Synchronization and error handling
 

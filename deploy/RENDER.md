@@ -29,7 +29,7 @@ Environment variables:
 After specific owner authorization, supply session.json and the matching session-bound verified.json
 as Render secret files. Never commit either file or embed them in build artifacts. Cloud connectivity
 and the existing session's validity need read-only verification; a changed session needs fresh
-verification. The existing interactive login helper and extended verification flows are not a fully
+verification for session-gated operations. Eligible PDF upload/import flows can instead use their pinned, historically tested project contracts. The existing interactive login helper and extended verification flows are not a fully
 tested unattended cloud onboarding mechanism. Update secret files when the session expires.
 
 Writes default to all libraries subject to per-action authorization. To use an allowlist instead, set `READCUBE_WRITE_POLICY=allowlist` and configure `READCUBE_WRITE_COLLECTIONS`. Library restrictions are saved under `READCUBE_STATE_DIR`; an ephemeral `/tmp` loses them on restart, so use durable storage for persistent restrictions. Separate deployments maintain separate policy files. PDF upload tools refer

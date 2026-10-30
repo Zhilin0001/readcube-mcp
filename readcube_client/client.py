@@ -20,6 +20,7 @@ from .errors import (
     AuthorizationError,
     PaginationError,
     ProtocolError,
+    ReadCubeError,
     TransportError,
     UnverifiedEndpointError,
     UploadPendingError,
@@ -72,7 +73,11 @@ class ReadCubeClient(AbstractContextManager):
         else:
             self.http = http
         self.session = session_fingerprint(self.http.cookies)
-        self.registry = EvidenceRegistry(self.settings.verification_file, self.session)
+        self.registry = EvidenceRegistry(
+            self.settings.verification_file,
+            self.session,
+            client_version=self.settings.client_version,
+        )
         self._research = False
         self._last_request = 0.0
         self.audit: list[dict] = []
@@ -570,7 +575,7 @@ class ReadCubeClient(AbstractContextManager):
             return WritePlan(
                 operation=name,
                 evidence=entry["evidence"],
-                verified=self.registry.verified(name),
+                verified=self.registry.allowed_in_current_scope(name),
                 collection_id=collection_id,
                 method=entry["method"],
                 path=self._path(name, ids),
@@ -867,9 +872,10 @@ class ReadCubeClient(AbstractContextManager):
         authorization: WriteAuthorization | None = None,
         dry_run: bool | None = None,
     ):
-        return self._upload_pdf(
-            collection_id, item_id, path, authorization=authorization, dry_run=dry_run
-        )
+        with self.registry.pdf_upload_scope("upload_pdf_flow"):
+            return self._upload_pdf(
+                collection_id, item_id, path, authorization=authorization, dry_run=dry_run
+            )
 
     def import_pdf(
         self,
@@ -880,6 +886,12 @@ class ReadCubeClient(AbstractContextManager):
         dry_run: bool | None = None,
     ):
         """Import a PDF as a reference using the server's metadata resolution and merge flow."""
+        with self.registry.pdf_upload_scope("import_pdf_flow"):
+            return self._import_pdf_scoped(
+                collection_id, path, authorization=authorization, dry_run=dry_run
+            )
+
+    def _import_pdf_scoped(self, collection_id, path, *, authorization, dry_run):
         if self.settings.dry_run if dry_run is None else dry_run:
             return self._upload_pdf(
                 collection_id, None, path, authorization=authorization, dry_run=True
@@ -951,7 +963,7 @@ class ReadCubeClient(AbstractContextManager):
         self._recent_pdf_imports[key] = result["item"]["id"]
         saved[digest] = result["item"]["id"]
         private_json_write(cache_path, saved)
-        result.update(created=True, needs_review=False)
+        result.update(created=not result.get("reconciled", False), needs_review=False)
         return result
 
     def _pdf_info(self, path):
@@ -990,20 +1002,111 @@ class ReadCubeClient(AbstractContextManager):
             body.update(resolve=True, skip_resolve=False, merge=True, user_data={"tags": []})
         is_dry = self.settings.dry_run if dry_run is None else dry_run
         if not is_dry:
+            self._check_authorization(collection_id, authorization)
             self._require(operation)
             self._require("uploads_pending")
-            if not self._research and not self.registry.verified(flow):
+            self._require("get_item")
+            if not self._research and not self.registry.allowed_in_current_scope(flow):
                 raise UnverifiedEndpointError(f"{flow}: UNVERIFIED; storage PUT must also pass")
-        first = self._write(operation, ids, body, authorization=authorization, dry_run=dry_run)
-        if isinstance(first, WritePlan):
-            first.note = f"Plan: {operation} -> isolated storage PUT -> uploads_pending -> {operation} -> get_item."
-            return first
+        if is_dry:
+            plan = self._write(operation, ids, body, authorization=authorization, dry_run=True)
+            plan.note = (
+                f"Plan: {operation} -> isolated storage PUT -> uploads_pending -> "
+                f"{operation} -> get_item. PDF project contracts do not verify this session."
+            )
+            return plan
+
+        # Serialize identical uploads across sessions and record uncertainty before
+        # the first POST. A timeout must never silently trigger a second upload.
+        from types import SimpleNamespace
+
+        from .workflow import _state_lock
+
+        lock_client = SimpleNamespace(settings=self.settings, session="pdf-upload-guard-v1")
+        key = hashlib.sha256(f"{collection_id}:{item_id or 'import'}:{digest}".encode()).hexdigest()
+        journal = self.settings.state_dir / "pdf-upload-guard" / (key + ".json")
+        with _state_lock(lock_client, collection_id, ".pdf-" + key + ".lock"):
+            if journal.is_symlink():
+                raise ProtocolError("PDF upload journal cannot be a symlink")
+            if journal.exists():
+                try:
+                    previous = json.loads(journal.read_text())
+                    if not isinstance(previous, dict) or previous.get("state") not in (
+                        "pending",
+                        "verified",
+                        "rejected",
+                    ):
+                        raise ValueError
+                except (OSError, ValueError):
+                    raise ProtocolError(
+                        "Invalid PDF upload journal; reconcile before retrying"
+                    ) from None
+                recover_id = item_id or previous.get("item_id")
+                if previous["state"] == "pending" or (
+                    not item_id and previous["state"] == "verified"
+                ):
+                    if recover_id:
+                        try:
+                            verified = self._verify_attachment(
+                                collection_id, identifier(recover_id), digest, flow
+                            )
+                        except (ReadCubeError, ValueError, TypeError):
+                            raise UploadPendingError(
+                                "Previous PDF upload is uncertain; inspect the item before retrying"
+                            ) from None
+                        private_json_write(journal, {"state": "verified", "item_id": recover_id})
+                        return verified | {"reconciled": True}
+                    raise UploadPendingError(
+                        "Previous PDF import is uncertain; inspect the library before retrying"
+                    )
+            private_json_write(journal, {"state": "pending"})
+
+            def save_target(target):
+                private_json_write(journal, {"state": "pending", "item_id": identifier(target)})
+
+            def save_rejected():
+                private_json_write(journal, {"state": "rejected"})
+
+            result = self._perform_pdf_upload(
+                collection_id,
+                item_id,
+                path,
+                body,
+                ids,
+                operation,
+                flow,
+                authorization,
+                save_target,
+                save_rejected,
+            )
+            private_json_write(journal, {"state": "verified", "item_id": result["item"]["id"]})
+            return result
+
+    def _perform_pdf_upload(
+        self,
+        collection_id,
+        item_id,
+        path,
+        body,
+        ids,
+        operation,
+        flow,
+        authorization,
+        save_target,
+        save_rejected,
+    ):
+        try:
+            first = self._write(operation, ids, body, authorization=authorization, dry_run=False)
+        except (AuthenticationError, AuthorizationError, UnverifiedEndpointError):
+            # The first request was explicitly rejected or failed locally before transmission.
+            save_rejected()
+            raise
         if first.get("item"):
             if not isinstance(first["item"], dict) or not isinstance(first["item"].get("id"), str):
                 raise ProtocolError("Upload initialization returned an invalid item")
-            return self._verify_attachment(
-                collection_id, item_id or first["item"]["id"], body["hash"], flow
-            )
+            target = item_id or first["item"]["id"]
+            save_target(target)
+            return self._verify_attachment(collection_id, target, body["hash"], flow)
         upload_id = first.get("upload_id")
         url = first.get("upload_url")
         if not upload_id or not isinstance(url, str):
@@ -1059,12 +1162,15 @@ class ReadCubeClient(AbstractContextManager):
                 target = item_id or linked.get("item", {}).get("id")
                 if not target:
                     raise ProtocolError("Upload association did not return an item ID")
+                save_target(target)
                 return self._verify_attachment(collection_id, target, body["hash"], flow)
             time.sleep(3)
         raise UploadPendingError("PDF processing is pending; inspect state before retrying")
 
     def _verify_attachment(self, collection_id, item_id, digest, flow="upload_pdf_flow"):
         item = self.get_item(collection_id, item_id)
+        if item.get("id") != item_id:
+            raise ProtocolError("PDF readback returned a different item")
         hashes = {file.get("sha256") or file.get("hash") for file in item.get("files", [])}
         hashes.add(item.get("primary_file_hash"))
         if digest not in hashes:

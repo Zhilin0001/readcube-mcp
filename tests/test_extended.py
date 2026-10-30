@@ -37,7 +37,7 @@ def test_import_pdf_dry_run_needs_no_network_or_verified_flow(make_client, pdf):
     assert plan.operation == "upload_file"
     assert plan.body["hash"] == digest
     assert plan.body["resolve"] is True
-    assert plan.verified is False
+    assert plan.verified is True  # Historical project contract; not session verification.
 
 
 def test_import_pdf_requires_flow_not_only_initialization_endpoint(make_client, pdf):
@@ -46,6 +46,8 @@ def test_import_pdf_requires_flow_not_only_initialization_endpoint(make_client, 
         verified=["upload_file"],
         write_collections=["library"],
     )
+    # A changed request contract cannot inherit the pinned historical result.
+    client.registry.catalog["import_pdf_flow"]["body_contract"] = "changed contract"
     with pytest.raises(UnverifiedEndpointError, match="import_pdf_flow"):
         client.import_pdf("library", pdf[0], dry_run=False, authorization=AUTH)
 

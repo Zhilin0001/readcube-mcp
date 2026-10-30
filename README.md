@@ -2,9 +2,15 @@
 
 An unofficial Python 3.11+ SDK and local stdio MCP server for managing your own ReadCube Papers library.
 
-**v0.3.5 · 44 local MCP tools · 40 cataloged API operations and workflows, gated by per-session verification.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
+**v0.3.6 · 44 local MCP tools · 40 cataloged API operations and workflows.** Supports reference search and import, PDFs, notes, tags, Lists, Smart Lists, annotations, and notification-assisted synchronization.
 
 Verification was performed on October 24–25, 2026, using an explicitly authorized private test Collection. The published results cover the documented requests and test cases, not every account role, parameter, or authentication flow. This project is not affiliated with ReadCube.
+
+## PDF upload without per-session test libraries in v0.3.6
+
+Previously verified PDF upload and import contracts can run in a new session without repeating a test-library upload. This applies only within the PDF flows, only to the exact pinned contracts exercised by the project and client version 5.4.24. `readcube_capabilities` reports `PROJECT_VERIFIED_FOR_PDF` separately from `session_verification`; it does not claim the current account was live-tested. A changed contract/version returns to the session verification gate. Other operations keep their existing gates.
+
+Every actual upload still requires explicit user authorization, local write policy, allowed file roots and upload hosts, a valid session and the ReadCube account's target permissions. The uploaded attachment is independently read back and SHA-256 checked. A private per-file journal records pending transfers before the first write, prevents automatic resubmission after an uncertain result, and can reconcile a known attachment by hash. Failed/unknown transfers require inspection when no item ID is known. Cloud deployments must use persistent state storage for this protection across restarts.
 
 ## Batch DOI import in v0.3.5
 
@@ -20,7 +26,7 @@ By default, all libraries are eligible for writes (`write_policy = "all"`), subj
 
 ## Local macOS login in v0.3.3
 
-Say “Open the ReadCube login window” to call `readcube_open_login` from the local stdio server. By default, macOS Terminal opens the login helper; `mode="dialog"` instead opens email and masked-password dialogs. Credentials go directly to the local helper, not tool arguments or chat. The MCP response confirms only that the helper was started; the window reports whether sign-in and a read-only connection check succeeded. Failed or cancelled login leaves the old session in place. The saved session is scoped to this Mac, and a changed session requires its own endpoint verification. SSO/MFA is not implemented. The remote HTTP service does not expose this local-only tool.
+Say “Open the ReadCube login window” to call `readcube_open_login` from the local stdio server. By default, macOS Terminal opens the login helper; `mode="dialog"` instead opens email and masked-password dialogs. Credentials go directly to the local helper, not tool arguments or chat. The MCP response confirms only that the helper was started; the window reports whether sign-in and a read-only connection check succeeded. Failed or cancelled login leaves the old session in place. The saved session is scoped to this Mac; a changed session requires its own verification for operations other than eligible project-verified PDF flows. SSO/MFA is not implemented. The remote HTTP service does not expose this local-only tool.
 
 ## Pagination recovery in v0.3.2
 
@@ -76,7 +82,7 @@ readcube --config readcube.local.toml append-note COLLECTION_ID ITEM_ID 'Authori
 readcube --config readcube.local.toml --execute --authorize-collection COLLECTION_ID append-note COLLECTION_ID ITEM_ID 'Authorized marker'
 ```
 
-The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.5 and its 44 local tools; subsequent write policy edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows preserve deletion confirmation requirements.
+The server reuses a pool of up to four HTTP clients. Each invocation still reloads configuration, validates local session expiry and permissions, and checks verification evidence; changes retire old clients. Response cookies are reset to the verified saved session on checkout without discarding HTTP connections. Existing processes need one restart to load v0.3.6 and its 44 local tools; subsequent write policy edits take effect on the next invocation. A ReadCube `unread=false` mark or an annotation is not proof that the entire article has been read. These workflows preserve deletion confirmation requirements.
 
 See [performance measurements and tradeoffs](docs/performance.md). Concurrent cold queries share a scan; scans do not hold the write lock during network work. A scan overlapping a local write retries once rather than overwriting newer notes. Compact query notes are previews of at most 320 characters; full notes remain searchable and available through `readcube_get_paper`.
 
@@ -111,7 +117,7 @@ Enter your email and password in the local prompt, never in command arguments or
 
 Session cookies are stored at `~/.config/readcube-client/session.json` with permissions `0600`. The session-bound verification ledger is stored separately at `~/.config/readcube-client/verified.json`. Neither file is distributed with this repository.
 
-**Production calls require matching verification evidence for the active session and exact endpoint contract.** Source code evidence alone does not unlock an operation. A new session needs its own verification; the public [verification snapshot](docs/verification-results.json) cannot substitute for the private ledger. Unverified operations raise `UnverifiedEndpointError` rather than returning simulated success.
+**Most production calls require matching verification evidence for the active session and exact endpoint contract.** PDF upload/import additionally accept the pinned, historically live-tested project contracts only within the corresponding PDF flow. This does not mark the current session as verified, and other operations retain their session gate. Source confirmation alone does not unlock an operation. Unverified operations raise `UnverifiedEndpointError` rather than returning simulated success.
 
 By default, `verify_api.py` verifies the Collection-list read and saves a plan without remote writes. To explicitly authorize its synthetic test workflow:
 
@@ -206,6 +212,8 @@ Only GET requests are retried. The client honors `Retry-After`; waits longer tha
 
 ## Validation and packaging
 
+v0.3.6: **258 local tests passed, 2 opt-in tests skipped.** A fresh simulated session without a private verification ledger passed project-contract scope, upload, import, integrity, failure, and retry-guard tests. A live authenticated read-only test used an empty verification ledger and confirmed the project-scoped collection and item reads. Actual PDF writes were not live-tested in the new session because the dedicated test collection was unavailable.
+
 v0.3.5: **247 local tests passed, 2 opt-in tests skipped**. A real tPBM dry-run preview used one requested full scan for two DOI inputs; real batch writes were not tested because the dedicated test library was unavailable in the current session. A mock 1,000-record, 10-DOI benchmark used 30 GETs (20 scan pages and 10 readbacks), versus 200 scan GETs for ten individual lookups; these are request counts, not live timing promises.
 
 v0.3.2: **228 local tests passed, 2 opt-in tests skipped**. Pagination recovery is covered for changed totals, missing cursors, duplicate page entries and repeated failures that must not issue an import write. Read-only scans of tPBM and My Papers passed on October 29; the originally reported transient error was not reproduced in those scans.
@@ -220,7 +228,7 @@ Recorded validation for v0.3.1: **224 local tests passed, 2 opt-in integration t
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.5.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
+Live integration tests require explicit opt-in through `READCUBE_RUN_INTEGRATION=1` and `READCUBE_TEST_COLLECTION`. Packaging produces `dist/readcube-mcp-0.3.6.zip` without credentials, plus a separate ignored `mcp.local.json` for the current machine. The bundle includes `tools.json` with all tool schemas.
 
 ## Documentation and limitations
 

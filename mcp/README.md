@@ -1,4 +1,4 @@
-# ReadCube MCP 0.3.5
+# ReadCube MCP 0.3.6
 
 A Python 3.11+ local stdio MCP server with **44 local tools**, built on the ReadCube SDK. Distribution bundles contain no passwords, cookies, session-bound verification ledger, or private library content.
 
@@ -24,7 +24,7 @@ From the repository root, with the `dev` dependencies installed:
 .venv/bin/python scripts/build_mcp_bundle.py
 ```
 
-Extract `dist/readcube-mcp-0.3.5.zip`, enter the extracted directory, and run:
+Extract `dist/readcube-mcp-0.3.6.zip`, enter the extracted directory, and run:
 
 ```bash
 ./install.sh
@@ -46,7 +46,7 @@ Default local files:
 - Session: `~/.config/readcube-client/session.json`, permissions `0600`.
 - Verification ledger: `~/.config/readcube-client/verified.json`.
 
-Do not distribute either file. A new installation or changed session is not unlocked by this repository's public verification snapshot. Use the local interactive login helper and perform authorized semantic verification for the relevant operations. `scripts/verify_api.py` defaults to a Collection-list read and a saved dry-run plan; broader live verification needs a dedicated test library. Extended research scripts depend on private test-resource files and are not a general one-command initialization flow. Special SSO/MFA/CSRF flows remain incompletely tested.
+Do not distribute either file. Most operations still need matching session evidence. PDF upload/import may instead use the pinned, historically tested project contracts within those flows, without claiming that the current session was verified. Use the local interactive login helper and perform authorized semantic verification for the relevant operations. `scripts/verify_api.py` defaults to a Collection-list read and a saved dry-run plan; broader live verification needs a dedicated test library. Extended research scripts depend on private test-resource files and are not a general one-command initialization flow. Special SSO/MFA/CSRF flows remain incompletely tested.
 
 ## Tool access
 
